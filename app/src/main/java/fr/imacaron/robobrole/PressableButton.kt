@@ -1,52 +1,49 @@
 package fr.imacaron.robobrole
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PressableButton(
+fun ButtonLong(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onPress: () -> Unit = {},
-    onLongPress: () -> Unit = {},
+    shape: Shape = ButtonDefaults.shape,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ){
-    val contentColor by ButtonDefaults.buttonColors().contentColor(true)
+    val contentColor = contentColorFor(MaterialTheme.colorScheme.primary)
+    val containerColor = MaterialTheme.colorScheme.primary
     val haptic = LocalHapticFeedback.current
     Surface(
-        contentColor = contentColor.copy(alpha = 1f)
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = {haptic.performHapticFeedback(HapticFeedbackType.LongPress);onLongClick()}),
+        shape = shape,
+        color = containerColor,
+        contentColor = contentColor,
+        tonalElevation = 0.0.dp,
+        border = border,
     ) {
-        CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
-            ProvideTextStyle(MaterialTheme.typography.button) {
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
+            ProvideTextStyle(MaterialTheme.typography.labelLarge) {
                 Row(
-                    modifier
-                        .padding(6.dp, 0.dp)
-                        .combinedClickable(
-                            onClick = onPress,
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onLongPress()
-                            }
-                        )
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(MaterialTheme.colors.primary)
-                        .padding(0.dp, 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    Modifier.
+                        defaultMinSize(ButtonDefaults.MinWidth, ButtonDefaults.MinHeight)
+                        .padding(contentPadding),
                     horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                     content = content
                 )
             }

@@ -9,9 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,6 +33,7 @@ enum class Theme(val value: Int){
 }
 
 class MainActivity : ComponentActivity() {
+	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
@@ -68,13 +69,13 @@ class MainActivity : ComponentActivity() {
 										Icon(Icons.Filled.MoreVert, null)
 									}
 									DropdownMenu(expanded = displayMenu, onDismissRequest = { displayMenu = false }){
-										DropdownMenuItem(onClick = { points.forEach(Points::reinit); displayMenu = false; quart = 0 }){ Text("Nouveau match") }
+										DropdownMenuItem(text = { Text("Nouveau match") }, onClick = { points.forEach(Points::reinit); displayMenu = false; quart = 0 })
 										Divider()
-										DropdownMenuItem(onClick = { sharedPref.edit().apply{ putInt("theme", 2);apply();darkTheme = Theme.Default } }){ Text("Réinitialiser les paramètre")}
+										DropdownMenuItem(text = { Text("Réinitialiser les paramètre")}, onClick = { sharedPref.edit().apply{ putInt("theme", 2);apply();darkTheme = Theme.Default } })
 									}
 								}
 							},
-							elevation = 4.dp
+							colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
 						)
 					},
 					floatingActionButton = {
@@ -85,26 +86,28 @@ class MainActivity : ComponentActivity() {
 				) {
 					Surface(modifier = Modifier.fillMaxSize().padding(it)) {
 						Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceAround) {
-							Row {
-								ButtonColumn(points, quart)
-								QuartColumn(points[0], quart == 0, "1") {
-									quart = 0
-								}
-								QuartColumn(points[1], quart == 1, "2") {
-									quart = 1
-								}
-								QuartColumn(points[2], quart == 2, "3") {
-									quart = 2
-								}
-								QuartColumn(points[3], quart == 3, "4") {
-									quart = 3
-								}
+							Card(Modifier.padding(10.dp, 0.dp)) {
+								Row {
+									ButtonColumn(points, quart)
+									QuartColumn(points[0], quart == 0, "1") {
+										quart = 0
+									}
+									QuartColumn(points[1], quart == 1, "2") {
+										quart = 1
+									}
+									QuartColumn(points[2], quart == 2, "3") {
+										quart = 2
+									}
+									QuartColumn(points[3], quart == 3, "4") {
+										quart = 3
+									}
 
+								}
 							}
 							Text(
-								"Total : ${points.sumOf { it.tot() }}",
+								"Total : ${points.sumOf { points -> points.tot() }}",
 								Modifier.fillMaxWidth(),
-								style = MaterialTheme.typography.h3,
+								style = MaterialTheme.typography.displaySmall,
 								textAlign = TextAlign.Center
 							)
 						}
@@ -157,9 +160,7 @@ class MainActivity : ComponentActivity() {
 fun Preview() {
 	RobobroleTheme {
 		Surface {
-			PressableButton() {
-				Text("Coucou")
-			}
+
 		}
 	}
 }
