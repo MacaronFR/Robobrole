@@ -9,6 +9,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -85,7 +87,11 @@ class MainActivity : ComponentActivity() {
 					}
 				) {
 					Surface(modifier = Modifier.fillMaxSize().padding(it)) {
-						Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceAround) {
+						Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.SpaceAround) {
+							QuartCard(points[0], 1)
+							QuartCard(points[1], 2)
+							QuartCard(points[2], 3)
+							QuartCard(points[3], 4)
 							Card(Modifier.padding(10.dp, 0.dp)) {
 								Row {
 									ButtonColumn(points, quart)
