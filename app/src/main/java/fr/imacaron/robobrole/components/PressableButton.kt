@@ -1,4 +1,4 @@
-package fr.imacaron.robobrole
+package fr.imacaron.robobrole.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi

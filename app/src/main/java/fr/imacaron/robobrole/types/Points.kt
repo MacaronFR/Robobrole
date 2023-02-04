@@ -1,4 +1,4 @@
-package fr.imacaron.robobrole
+package fr.imacaron.robobrole.types
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

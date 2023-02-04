@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import fr.imacaron.robobrole.Theme
+import fr.imacaron.robobrole.types.Theme
 
 
 private val LightColors = lightColorScheme(

@@ -1,4 +1,4 @@
-package fr.imacaron.robobrole
+package fr.imacaron.robobrole.match
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,6 +12,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import fr.imacaron.robobrole.types.Points
+import fr.imacaron.robobrole.components.ButtonLong
 
 @Composable
 fun ScoreText(text: String){
