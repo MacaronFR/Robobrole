@@ -35,7 +35,7 @@ fun MatchScreen(points: List<Points>){
 		val activity = LocalContext.current as MainActivity
 		ElevatedCard(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
 			Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-				Column {
+				Column(Modifier.padding(0.dp, 8.dp)) {
 					Text("Total du match : ${points.sumOf { it.tot() }}", Modifier.fillMaxWidth().padding(16.dp, 6.dp), color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 					Text("Total du quart temps : ${points[swipeState.currentValue].tot()}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 				}

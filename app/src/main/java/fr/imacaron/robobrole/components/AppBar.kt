@@ -4,10 +4,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import fr.imacaron.robobrole.R
@@ -40,18 +39,18 @@ fun AppBar(appState: AppState){
 					Icon(ImageVector.vectorResource(R.drawable.moon), null)
 				}
 			}
-			Box(Modifier.clip(MaterialTheme.shapes.medium)){
+			Box{
 				IconButton({appState.toggleMenu()}){
 					Icon(Icons.Filled.MoreVert, null)
 				}
 				DropdownMenu(expanded = appState.displayMenu, onDismissRequest = { appState.closeMenu() }){
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },
-						onClick = { appState.setDefaultTheme() }
+						onClick = { appState.setDefaultTheme() },
+						leadingIcon = { Icon(Icons.Outlined.Refresh, null) }
 					)
 				}
 			}
-		},
-		colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
+		}
 	)
 }
