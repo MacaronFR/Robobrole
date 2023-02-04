@@ -41,6 +41,7 @@ fun MatchScreen(points: List<Points>){
 				}
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround) {
 					FilledTonalButton({ points.forEach(Points::reinit) }){
+						println("Make")
 						Text("Nouveau Match")
 					}
 					Button({activity.save(points)}){

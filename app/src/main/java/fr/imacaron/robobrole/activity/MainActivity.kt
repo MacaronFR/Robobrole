@@ -19,6 +19,7 @@ import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.AppBar
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.home.HomeScreen
+import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 
@@ -38,7 +39,6 @@ class MainActivity : ComponentActivity() {
 			applicationContext,
 			AppDatabase::class.java, "match"
 		).build()
-		val points: List<Points> = listOf(Points(), Points(), Points(), Points())
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 		val appState = AppState(sharedPref)
 		setContent {
@@ -48,8 +48,9 @@ class MainActivity : ComponentActivity() {
 					topBar = { AppBar(appState) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("home"){ HomeScreen() }
-						composable("match"){ MatchScreen(points) }
+						composable("home"){ HomeScreen(navController) }
+						composable("new_match"){ NewMatchScreen(navController) }
+						composable("match"){ MatchScreen(appState.points) }
 					}
 				}
 			}

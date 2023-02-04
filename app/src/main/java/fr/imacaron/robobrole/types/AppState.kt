@@ -7,6 +7,8 @@ import androidx.core.content.edit
 @Stable
 class AppState(sharedPref: SharedPreferences) {
 
+	val points: List<Points> = listOf(Points(), Points(), Points(), Points())
+
 	val sharedPref: SharedPreferences by mutableStateOf(sharedPref)
 	var theme: Theme by mutableStateOf(Theme.values()[sharedPref.getInt("theme", Theme.Default.value)])
 		private set
