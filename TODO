@@ -1,0 +1,24 @@
+- Timestamp de chaque action
+	- SQLite
+	- Refaire CSV
+- Nom équipes
+- Points opposant
+- Refaire carte de match
+	- Statistique
+		- Point
+		- Changement
+		- Moyenne
+		- …
+- Changement
+- Temps mort
+- Partager
+	- Génération d'image
+	- JSON
+	- …
+- Sauvegarde en ligne
+	- Visualisation sur le web
+- Écran Accueil
+- Écran nouveau match
+- Écran Match
+	- Match terminé
+- Écran Historique des matchs
