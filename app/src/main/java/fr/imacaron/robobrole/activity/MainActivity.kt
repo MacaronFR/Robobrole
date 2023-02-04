@@ -16,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.AppBar
-import fr.imacaron.robobrole.components.SaveFloatingButton
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 
@@ -36,7 +35,6 @@ class MainActivity : ComponentActivity() {
 			RobobroleTheme(darkTheme = appState.theme) {
 				Scaffold(
 					topBar = { AppBar(appState) },
-					floatingActionButton = { SaveFloatingButton(appState) }
 				) {
 					NavHost(navController, startDestination = "match", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("match"){ MatchScreen(appState.points) }
