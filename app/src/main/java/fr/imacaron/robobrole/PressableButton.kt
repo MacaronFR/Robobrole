@@ -25,8 +25,8 @@ fun ButtonLong(
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ){
-    val contentColor = contentColorFor(MaterialTheme.colorScheme.primary)
-    val containerColor = MaterialTheme.colorScheme.primary
+    val contentColor = contentColorFor(MaterialTheme.colorScheme.secondary)
+    val containerColor = MaterialTheme.colorScheme.secondary
     val haptic = LocalHapticFeedback.current
     Surface(
         modifier = modifier.combinedClickable(onClick = onClick, onLongClick = {haptic.performHapticFeedback(HapticFeedbackType.LongPress);onLongClick()}),

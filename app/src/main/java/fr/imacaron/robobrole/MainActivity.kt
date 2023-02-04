@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
 									}
 								}
 							},
-							colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+							colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
 						)
 					},
 					floatingActionButton = {
