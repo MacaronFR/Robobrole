@@ -18,9 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 
 import java.io.File
@@ -87,35 +85,11 @@ class MainActivity : ComponentActivity() {
 					}
 				) {
 					Surface(modifier = Modifier.fillMaxSize().padding(it)) {
-						Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.SpaceAround) {
+						Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
 							QuartCard(points[0], 1)
 							QuartCard(points[1], 2)
 							QuartCard(points[2], 3)
 							QuartCard(points[3], 4)
-							Card(Modifier.padding(10.dp, 0.dp)) {
-								Row {
-									ButtonColumn(points, quart)
-									QuartColumn(points[0], quart == 0, "1") {
-										quart = 0
-									}
-									QuartColumn(points[1], quart == 1, "2") {
-										quart = 1
-									}
-									QuartColumn(points[2], quart == 2, "3") {
-										quart = 2
-									}
-									QuartColumn(points[3], quart == 3, "4") {
-										quart = 3
-									}
-
-								}
-							}
-							Text(
-								"Total : ${points.sumOf { points -> points.tot() }}",
-								Modifier.fillMaxWidth(),
-								style = MaterialTheme.typography.displaySmall,
-								textAlign = TextAlign.Center
-							)
 						}
 					}
 				}
@@ -151,9 +125,9 @@ class MainActivity : ComponentActivity() {
 
 	private fun getCsv(points: List<Points>): String {
 		val res = StringBuilder()
-		res.appendLine("1 point,2 points,3 points,lucille")
+		res.appendLine("1 point;2 points;3 points;lucille")
 		points.forEach { p ->
-			res.appendLine("${p.one},${p.two},${p.three},${p.lucille}")
+			res.appendLine("${p.one};${p.two};${p.three};${p.lucille}")
 		}
 		return res.toString()
 	}
