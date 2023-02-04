@@ -13,9 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.AppBar
+import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 
@@ -26,9 +29,15 @@ import java.lang.StringBuilder
 
 class MainActivity : ComponentActivity() {
 
+	lateinit var db: AppDatabase
+
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		db = Room.databaseBuilder(
+			applicationContext,
+			AppDatabase::class.java, "match"
+		).build()
 		val points: List<Points> = listOf(Points(), Points(), Points(), Points())
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 		val appState = AppState(sharedPref)
@@ -39,6 +48,7 @@ class MainActivity : ComponentActivity() {
 					topBar = { AppBar(appState) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
+						composable("home"){ HomeScreen() }
 						composable("match"){ MatchScreen(points) }
 					}
 				}

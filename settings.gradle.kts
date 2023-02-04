@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Robobrole"
-include ':app'
+include(":app")
