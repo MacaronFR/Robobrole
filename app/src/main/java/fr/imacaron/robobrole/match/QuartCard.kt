@@ -40,16 +40,16 @@ fun QuartCard(points: Points, index: Int){
 	Card(Modifier.padding(10.dp, 7.dp)) {
 		TotalText(index, points.tot())
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 6.dp)) {
-			ButtonLong({ points.one++ }, { if(points.one > 0) points.one-- }) { LabelText("+1") }
-			ButtonLong({ points.two++ }, { if(points.two > 0) points.two-- }) { LabelText("+2") }
-			ButtonLong({ points.three++ }, { if(points.three > 0) points.three-- }) { LabelText("+3") }
-			ButtonLong({ points.lucille++ }, { if(points.lucille > 0) points.lucille-- }) { LabelText("+L") }
-		}
-		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 6.dp)) {
 			ScoreText("${points.one}")
 			ScoreText("${points.two}")
 			ScoreText("${points.three}")
 			ScoreText("${points.lucille}")
+		}
+		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 6.dp)) {
+			ButtonLong({ points.one++ }, { if(points.one > 0) points.one-- }) { LabelText("+1") }
+			ButtonLong({ points.two++ }, { if(points.two > 0) points.two-- }) { LabelText("+2") }
+			ButtonLong({ points.three++ }, { if(points.three > 0) points.three-- }) { LabelText("+3") }
+			ButtonLong({ points.lucille++ }, { if(points.lucille > 0) points.lucille-- }) { LabelText("+L") }
 		}
 	}
 }
