@@ -12,7 +12,8 @@ import fr.imacaron.robobrole.types.AppState
 
 @Composable
 fun SaveFloatingButton(appState: AppState){
-	FloatingActionButton({ (LocalContext.current as MainActivity).save(appState.points)}) {
+	val activity = (LocalContext.current as MainActivity)
+	FloatingActionButton({ activity.save(appState.points)}) {
 		Icon(ImageVector.vectorResource(R.drawable.save), null)
 	}
 }
