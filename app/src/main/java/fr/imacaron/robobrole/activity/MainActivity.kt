@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.AppBar
@@ -29,13 +32,14 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 			val appState = AppState(sharedPref)
+			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = appState.theme) {
 				Scaffold(
 					topBar = { AppBar(appState) },
 					floatingActionButton = { SaveFloatingButton(appState) }
 				) {
-					Surface(modifier = Modifier.fillMaxSize().padding(it)) {
-						MatchScreen(appState.points)
+					NavHost(navController, startDestination = "match", modifier = Modifier.fillMaxSize().padding(it)){
+						composable("match"){ MatchScreen(appState.points) }
 					}
 				}
 			}
