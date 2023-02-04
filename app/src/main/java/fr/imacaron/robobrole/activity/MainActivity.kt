@@ -25,19 +25,20 @@ import java.io.IOException
 import java.lang.StringBuilder
 
 class MainActivity : ComponentActivity() {
+
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		val points: List<Points> = listOf(Points(), Points(), Points(), Points())
+		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
+		val appState = AppState(sharedPref)
 		setContent {
-			val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
-			val appState = AppState(sharedPref)
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = appState.theme) {
 				Scaffold(
 					topBar = { AppBar(appState) },
 				) {
-					NavHost(navController, startDestination = "match", modifier = Modifier.fillMaxSize().padding(it)){
+					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("match"){ MatchScreen(points) }
 					}
 				}
