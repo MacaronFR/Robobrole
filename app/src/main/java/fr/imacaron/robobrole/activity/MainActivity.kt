@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		val points: List<Points> = listOf(Points(), Points(), Points(), Points())
 		setContent {
 			val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 			val appState = AppState(sharedPref)
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
 					topBar = { AppBar(appState) },
 				) {
 					NavHost(navController, startDestination = "match", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("match"){ MatchScreen(appState.points) }
+						composable("match"){ MatchScreen(points) }
 					}
 				}
 			}

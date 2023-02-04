@@ -6,11 +6,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.types.AppState
-import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.types.Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,20 +40,11 @@ fun AppBar(appState: AppState){
 					Icon(ImageVector.vectorResource(R.drawable.moon), null)
 				}
 			}
-			Box{
+			Box(Modifier.clip(MaterialTheme.shapes.medium)){
 				IconButton({appState.toggleMenu()}){
 					Icon(Icons.Filled.MoreVert, null)
 				}
 				DropdownMenu(expanded = appState.displayMenu, onDismissRequest = { appState.closeMenu() }){
-					DropdownMenuItem(
-						text = { Text("Nouveau match") },
-						onClick = {
-							appState.points.forEach(Points::reinit)
-							appState.closeMenu()
-							appState.quart = 0
-						}
-					)
-					Divider()
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },
 						onClick = { appState.setDefaultTheme() }

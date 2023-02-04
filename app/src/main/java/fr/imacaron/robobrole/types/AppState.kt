@@ -1,17 +1,20 @@
 package fr.imacaron.robobrole.types
 
 import android.content.SharedPreferences
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.core.content.edit
 
-class AppState(val sharedPref: SharedPreferences) {
+@Stable
+class AppState(sharedPref: SharedPreferences) {
+
+	init {
+		println("Make")
+	}
+
+	val sharedPref: SharedPreferences by mutableStateOf(sharedPref)
 	var theme: Theme by mutableStateOf(Theme.values()[sharedPref.getInt("theme", Theme.Default.value)])
 		private set
 	var displayMenu: Boolean by mutableStateOf(false)
-	var quart: Int by mutableStateOf(0)
-	val points: List<Points> = listOf(Points(), Points(), Points(), Points())
 
 	fun setLightTheme(setPref: Boolean = true){
 		theme = Theme.Light

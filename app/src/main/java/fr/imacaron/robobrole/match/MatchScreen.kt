@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +33,7 @@ fun MatchScreen(points: List<Points>){
 	Column {
 		val swipeState = rememberSwipeableState(0)
 		val activity = LocalContext.current as MainActivity
-		Card(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
+		ElevatedCard(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
 			Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
 				Column {
 					Text("Total du match : ${points.sumOf { it.tot() }}", Modifier.fillMaxWidth().padding(16.dp, 6.dp), color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
