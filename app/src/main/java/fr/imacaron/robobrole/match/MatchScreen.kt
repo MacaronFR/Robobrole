@@ -56,5 +56,11 @@ fun MatchScreen(points: List<Points>){
 			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * 2).roundToInt(), 0) }, points[2], 3)
 			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * 3).roundToInt(), 0) }, points[3], 4)
 		}
+		Box(Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp).width(size.dp).swipeable(state = swipeState, anchors = anchors, thresholds = { a, b -> println("$a, $b"); FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
+			QuartCard(Modifier.offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }, points[0], 1)
+			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx).roundToInt(), 0) }, points[1], 2)
+			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * 2).roundToInt(), 0) }, points[2], 3)
+			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * 3).roundToInt(), 0) }, points[3], 4)
+		}
 	}
 }

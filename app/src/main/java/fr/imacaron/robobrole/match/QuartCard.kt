@@ -11,12 +11,7 @@ import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.ButtonLong
 
 @Composable
-fun ScoreText(text: String){
-	Text(text, style = MaterialTheme.typography.titleLarge)
-}
-
-@Composable
-fun TotalText(index: Int){
+fun TeamText(index: Int){
 	Text("Quart temps $index", Modifier.fillMaxWidth().padding(0.dp, 10.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 }
 
@@ -26,21 +21,23 @@ fun LabelText(text: String){
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, badgeText: String, content: @Composable RowScope.() -> Unit){
+	BadgedBox( { Badge(Modifier.offset((-8).dp, 7.dp)) { Text(badgeText, style = MaterialTheme.typography.titleSmall) } } ){
+		ButtonLong(onClick, onLongClick, shape = MaterialTheme.shapes.large, content = content)
+	}
+}
+
+@Composable
 fun QuartCard(modifier: Modifier, points: Points, index: Int){
 	val conf = LocalConfiguration.current
 	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 7.dp)) {
-		TotalText(index)
-		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 6.dp)) {
-			ScoreText("${points.one}")
-			ScoreText("${points.two}")
-			ScoreText("${points.three}")
-			ScoreText("${points.lucille}")
-		}
+		TeamText(index)
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
-			ButtonLong({ points.one++ }, { if(points.one > 0) points.one-- }) { LabelText("1 pt") }
-			ButtonLong({ points.two++ }, { if(points.two > 0) points.two-- }) { LabelText("2 pt") }
-			ButtonLong({ points.three++ }, { if(points.three > 0) points.three-- }) { LabelText("3 pt") }
-			ButtonLong({ points.lucille++ }, { if(points.lucille > 0) points.lucille-- }) { LabelText("+L") }
+			PointButton({ points.one++ }, { if (points.one > 0) points.one-- }, "${points.one}") { LabelText("1 pt") }
+			PointButton({ points.two++ }, { if(points.two > 0) points.two-- }, "${points.two}") { LabelText("2 pt") }
+			PointButton({ points.three++ }, { if(points.three > 0) points.three-- }, "${points.three}") { LabelText("3 pt") }
+			PointButton({ points.lucille++ }, { if(points.lucille > 0) points.lucille-- }, "${points.lucille}") { LabelText("+L") }
 		}
 	}
 }
