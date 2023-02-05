@@ -69,6 +69,10 @@ class Point(private val db: AppDatabase, private val team: Team, private val nam
     infix fun reloadId(value: Long){
         inserted.add(value)
     }
+
+    operator fun plusAssign(other: Int) {
+        this.value += other
+    }
 }
 
 class Points(db: AppDatabase, team: Team, quart: Int){

@@ -8,6 +8,10 @@ import fr.imacaron.robobrole.db.AppDatabase
 @Stable
 class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 
+	var home: Boolean by mutableStateOf(false)
+
+	var alert: Boolean by mutableStateOf(false)
+
 	var left: Boolean by mutableStateOf(sharedPref.getBoolean("left", false))
 		private set
 

@@ -47,6 +47,7 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 	val rotate by animateFloatAsState(if (switch) 270f else 90f)
 	val focus = LocalFocusManager.current
 	val keyboard = LocalSoftwareKeyboardController.current
+	state.home = false
 	Column {
 		Card(defaultModifier) {
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)

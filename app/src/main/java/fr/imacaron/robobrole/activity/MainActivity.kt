@@ -28,6 +28,7 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.lang.StringBuilder
+import java.nio.charset.Charset
 
 class MainActivity : ComponentActivity() {
 
@@ -46,7 +47,7 @@ class MainActivity : ComponentActivity() {
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = appState.theme) {
 				Scaffold(
-					topBar = { AppBar(appState) },
+					topBar = { AppBar(appState, db, navController) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, appState) }
@@ -61,6 +62,12 @@ class MainActivity : ComponentActivity() {
 	suspend fun save(state: AppState) {
 		state.done = true
 		db.infoDao().setDone(state.infoId)
+		saveHistory(state.infoId, getCsv())
+	}
+
+	suspend fun export(id: Long, state: AppState){
+		val f = openFileInput(id.toString())
+		val data = f.readAllBytes().toString(Charset.defaultCharset())
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 		val initName = "${state.local.name}-${state.visitor.name}-${state.level}${state.gender}"
 		var name = "$initName.csv"
@@ -70,7 +77,22 @@ class MainActivity : ComponentActivity() {
 			index++
 			name = "$initName$index.csv"
 		}
-		saveFile(dir, name, getCsv())
+		saveFile(dir, name, data)
+	}
+
+	private suspend fun saveHistory(id: Long, data: String){
+		val f = openFileOutput(id.toString(), 0)
+		try {
+			f.write(data.toByteArray())
+			withContext(Dispatchers.Main){
+				Toast.makeText(baseContext, "Sauvegardé", Toast.LENGTH_SHORT).show()
+			}
+		} catch (e: IOException) {
+			withContext(Dispatchers.Main){
+				Toast.makeText(baseContext, "Erreur lors de la sauvegarde", Toast.LENGTH_SHORT).show()
+			}
+			e.printStackTrace()
+		}
 	}
 
 	private suspend fun saveFile(dir: File, fileName: String, data: String) {
@@ -80,7 +102,7 @@ class MainActivity : ComponentActivity() {
 			fw.append(data)
 			fw.close()
 			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Sauvegardé", Toast.LENGTH_SHORT).show()
+				Toast.makeText(baseContext, "Exporté", Toast.LENGTH_SHORT).show()
 			}
 		} catch (e: IOException) {
 			withContext(Dispatchers.Main){
@@ -98,6 +120,15 @@ class MainActivity : ComponentActivity() {
 			res.appendLine("${e.type};${e.team};${e.data};${e.time};${e.quart}")
 		}
 		return res.toString()
+	}
+
+	suspend fun loadFile(id: Long): String{
+		val f = openFileInput(id.toString())
+		return f.readAllBytes().toString(Charset.defaultCharset())
+	}
+
+	suspend fun removeAllSave(){
+		filesDir.listFiles()?.forEach { it.delete() }
 	}
 
 }

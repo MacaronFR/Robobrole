@@ -19,6 +19,13 @@ data class MatchEvent(
 	@ColumnInfo(name = "quart") val quart: Int,
 ){
 	constructor(type: Type, team: String, data: String, time: Long, quart: Int): this(0, type, team, data, time, quart)
+
+	companion object {
+		operator fun invoke(data: String): MatchEvent{
+			val d = data.split(';')
+			return MatchEvent(Type.values().find { it.name == d[0] }!!, d[1], d[2], d[3].toLong(), d[4].toInt())
+		}
+	}
 }
 
 class Converters {

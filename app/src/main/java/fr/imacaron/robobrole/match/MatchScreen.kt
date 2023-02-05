@@ -41,6 +41,7 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 	for( i in state.local.scores.indices){
 		anchors[i * -sizePx] = i
 	}
+	state.home = false
 	Column {
 		val swipeState = rememberSwipeableState(0)
 		val activity = LocalContext.current as MainActivity
@@ -63,7 +64,8 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 							GlobalScope.launch(Dispatchers.IO){
 								activity.save(state)
 							}
-						}
+						},
+						enabled = !state.done
 					){
 						Text("Sauvegarder")
 					}
