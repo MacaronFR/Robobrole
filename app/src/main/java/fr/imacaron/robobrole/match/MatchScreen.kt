@@ -50,14 +50,17 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 					Text("${state.local.scores[swipeState.currentValue].tot()}    ${state.visitor.scores[swipeState.currentValue].tot()}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 				}
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround) {
-					ElevatedButton({
-						val matchStart = System.currentTimeMillis() / 1000
-						state.local.matchStart = matchStart
-						state.visitor.matchStart = matchStart
-						GlobalScope.launch(Dispatchers.IO){
-							db.infoDao().setStart(matchStart, state.infoId)
-						}
-					}){ Text("Début du match") }
+					ElevatedButton(
+						{
+							val matchStart = System.currentTimeMillis() / 1000
+							state.local.matchStart = matchStart
+							state.visitor.matchStart = matchStart
+							GlobalScope.launch(Dispatchers.IO){
+								db.infoDao().setStart(matchStart, state.infoId)
+							}
+						},
+						enabled = state.local.matchStart == 0L
+					){ Text("Début du match") }
 					Button(
 						{
 							GlobalScope.launch(Dispatchers.IO){

@@ -20,16 +20,18 @@ fun ButtonLong(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     shape: Shape = ButtonDefaults.shape,
     border: BorderStroke? = null,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ){
-    val contentColor = contentColorFor(MaterialTheme.colorScheme.secondary)
-    val containerColor = MaterialTheme.colorScheme.secondary
+    val contentColor = if(enabled) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val containerColor = if(enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
     val haptic = LocalHapticFeedback.current
+    val enabledModifier = if(enabled) modifier.combinedClickable(onClick = onClick, onLongClick = {haptic.performHapticFeedback(HapticFeedbackType.LongPress);onLongClick()}) else modifier
     Surface(
-        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = {haptic.performHapticFeedback(HapticFeedbackType.LongPress);onLongClick()}),
+        modifier = enabledModifier,
         shape = shape,
         color = containerColor,
         contentColor = contentColor,

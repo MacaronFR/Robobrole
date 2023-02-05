@@ -9,7 +9,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.types.Team
-import kotlinx.coroutines.DelicateCoroutinesApi
 
 @Composable
 fun TeamText(name: String){
@@ -23,13 +22,12 @@ fun LabelText(text: String){
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, badgeText: String, content: @Composable RowScope.() -> Unit){
+fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, enabled: Boolean, badgeText: String, content: @Composable RowScope.() -> Unit){
 	BadgedBox( { Badge(Modifier.offset((-8).dp, 7.dp)) { Text(badgeText, style = MaterialTheme.typography.titleSmall) } } ){
-		ButtonLong(onClick, onLongClick, shape = MaterialTheme.shapes.large, content = content)
+		ButtonLong(onClick, onLongClick, enabled = enabled, shape = MaterialTheme.shapes.large, content = content)
 	}
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun QuartCard(modifier: Modifier, team: Team, index: Int){
 	val conf = LocalConfiguration.current
@@ -59,6 +57,7 @@ fun QuartCard(modifier: Modifier, team: Team, index: Int){
 							}
 						}
 					},
+					team.matchStart != 0L,
 					it
 				){
 					LabelText("${team.scores[index][it].value}")
