@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -23,11 +24,11 @@ fun ButtonLong(
     enabled: Boolean = true,
     shape: Shape = ButtonDefaults.shape,
     border: BorderStroke? = null,
+    contentColor: Color = if(enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+    containerColor: Color = if(enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ){
-    val contentColor = if(enabled) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    val containerColor = if(enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
     val haptic = LocalHapticFeedback.current
     val enabledModifier = if(enabled) modifier.combinedClickable(onClick = onClick, onLongClick = {haptic.performHapticFeedback(HapticFeedbackType.LongPress);onLongClick()}) else modifier
     Surface(

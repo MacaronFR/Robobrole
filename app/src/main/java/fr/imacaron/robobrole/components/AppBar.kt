@@ -7,6 +7,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import fr.imacaron.robobrole.R
@@ -44,6 +46,13 @@ fun AppBar(appState: AppState){
 					Icon(Icons.Filled.MoreVert, null)
 				}
 				DropdownMenu(expanded = appState.displayMenu, onDismissRequest = { appState.closeMenu() }){
+					DropdownMenuItem(
+						text = { Text(if(appState.left) "Gaucher" else "Droitier") },
+						onClick = {
+							appState.toggleLeftHanded()
+						},
+						leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.back_hand), null, Modifier.scale(if(appState.left) -1f else 1f, 1f)) }
+					)
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },
 						onClick = { appState.setDefaultTheme() },

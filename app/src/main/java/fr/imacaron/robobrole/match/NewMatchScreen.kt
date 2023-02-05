@@ -78,11 +78,11 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 				Row(defaultModifier, horizontalArrangement = Arrangement.SpaceAround) {
 					Row(verticalAlignment = Alignment.CenterVertically) {
 						RadioButton(!women, { women = false })
-						Text("Homme")
+						Text("Masculin")
 					}
 					Row(verticalAlignment = Alignment.CenterVertically) {
 						RadioButton(women, { women = true })
-						Text("Femme")
+						Text("Féminin")
 					}
 				}
 				Box(defaultModifier){
@@ -124,9 +124,10 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 						state.visitor.name = visitor
 						state.level = level
 						state.gender = if(women) "F" else "M"
+						state.done = false
 						GlobalScope.launch{
 							initSummary(state, db)
-							db.infoDao().insertInfo(Info(local, visitor, level, if(women) "F" else "H"))
+							state.infoId = db.infoDao().insertInfo(Info(local, visitor, level, if(women) "F" else "H"))
 						}
 						navController.navigate("match"){ popUpTo("home") }
 					}

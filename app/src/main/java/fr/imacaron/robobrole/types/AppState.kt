@@ -8,6 +8,11 @@ import fr.imacaron.robobrole.db.AppDatabase
 @Stable
 class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 
+	var left: Boolean by mutableStateOf(sharedPref.getBoolean("left", false))
+		private set
+
+	var done: Boolean by mutableStateOf(false)
+
 	var infoId: Long by mutableStateOf(0)
 
 	var gender: String by mutableStateOf("F")
@@ -47,6 +52,13 @@ class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 			sharedPref.edit {
 				putInt("theme", Theme.Default.value)
 			}
+		}
+	}
+
+	fun toggleLeftHanded(){
+		left = !left
+		sharedPref.edit {
+			putBoolean("left", left)
 		}
 	}
 

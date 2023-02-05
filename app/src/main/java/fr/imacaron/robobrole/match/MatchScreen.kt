@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -43,13 +44,9 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 	Column {
 		val swipeState = rememberSwipeableState(0)
 		val activity = LocalContext.current as MainActivity
-		ElevatedCard(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
-			Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-				Column(Modifier.padding(0.dp, 8.dp)) {
-					Text("${state.local.scores.sumOf { it.tot() }} Q${swipeState.currentValue + 1} ${state.visitor.scores.sumOf { it.tot() }}", Modifier.fillMaxWidth().padding(16.dp, 6.dp), color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
-					Text("${state.local.scores[swipeState.currentValue].tot()}    ${state.visitor.scores[swipeState.currentValue].tot()}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
-				}
-				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround) {
+		Column(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
+			Card(Modifier.padding(0.dp, 8.dp)) {
+				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround){
 					ElevatedButton(
 						{
 							val matchStart = System.currentTimeMillis() / 1000
@@ -59,7 +56,7 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 								db.infoDao().setStart(matchStart, state.infoId)
 							}
 						},
-						enabled = state.local.matchStart == 0L
+						enabled = state.local.matchStart == 0L && !state.done
 					){ Text("Début du match") }
 					Button(
 						{
@@ -72,18 +69,38 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 					}
 				}
 			}
+			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
+				Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+					TeamInfo(state.local, swipeState.targetValue)
+					Column(Modifier.weight(0.10f)) {
+						Text("Q${swipeState.targetValue+1}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
+					}
+					TeamInfo(state.visitor, swipeState.targetValue)
+				}
+			}
 		}
-		TeamCards(state.local, size.dp, sizePx, swipeState, anchors)
-		TeamCards(state.visitor, size.dp, sizePx, swipeState, anchors)
+		Column(Modifier.padding(0.dp, 8.dp)) {
+			TeamCards(state.local, size.dp, sizePx, swipeState, anchors, state.gender == "F", state.left, state.done)
+			TeamCards(state.visitor, size.dp, sizePx, swipeState, anchors, state.gender == "F", state.left, state.done)
+		}
+	}
+}
+
+@Composable
+fun RowScope.TeamInfo(team: Team, quart: Int){
+	Column(Modifier.weight(0.45f)) {
+		Text(team.name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
+		Text(team.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+		Text(team.scores[quart].tot().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
 	}
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TeamCards(team: Team, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>){
-	Box(Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
+fun TeamCards(team: Team, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>, women: Boolean, left: Boolean, done: Boolean){
+	Box(Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
 		for(i in team.scores.indices){
-			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, team, i)
+			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, team, i, women, left, done)
 		}
 	}
 }

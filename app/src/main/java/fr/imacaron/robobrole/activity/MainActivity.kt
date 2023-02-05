@@ -59,6 +59,8 @@ class MainActivity : ComponentActivity() {
 	}
 
 	suspend fun save(state: AppState) {
+		state.done = true
+		db.infoDao().setDone(state.infoId)
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
 		val initName = "${state.local.name}-${state.visitor.name}-${state.level}${state.gender}"
 		var name = "$initName.csv"

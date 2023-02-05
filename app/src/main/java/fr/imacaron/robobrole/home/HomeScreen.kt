@@ -70,6 +70,7 @@ suspend fun reloadInfo(state: AppState, info: Info){
 		state.visitor.matchStart = info.matchStart
 		state.level = info.level
 		state.infoId = info.uid
+		state.done = info.done
 	}
 }
 
@@ -94,7 +95,7 @@ suspend fun reloadEvent(state: AppState, db: AppDatabase){
 			}else {
 				state.visitor
 			}
-			team.scores[it.quart].apply {
+			team.scores[it.quart-1].apply {
 				when(it.data){
 					"1" -> one.reloadId(it.uid)
 					"2" -> two.reloadId(it.uid)

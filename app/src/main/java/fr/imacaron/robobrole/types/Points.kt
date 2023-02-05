@@ -21,7 +21,10 @@ class Team(db: AppDatabase){
     fun reset(){
         name = ""
         scores.forEach(Points::reinit)
+        matchStart = 0
     }
+
+    fun total(): Int = scores.sumOf { it.tot() }
 }
 
 class Point(private val db: AppDatabase, private val team: Team, private val name: String, private val quart: Int){
