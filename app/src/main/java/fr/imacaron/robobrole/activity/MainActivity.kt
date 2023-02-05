@@ -49,8 +49,8 @@ class MainActivity : ComponentActivity() {
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController) }
-						composable("new_match"){ NewMatchScreen(navController) }
-						composable("match"){ MatchScreen(appState.points) }
+						composable("new_match"){ NewMatchScreen(navController, appState) }
+						composable("match"){ MatchScreen(appState) }
 					}
 				}
 			}

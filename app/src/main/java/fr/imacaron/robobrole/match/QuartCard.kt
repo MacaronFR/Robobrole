@@ -7,12 +7,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import fr.imacaron.robobrole.types.Points
 import fr.imacaron.robobrole.components.ButtonLong
+import fr.imacaron.robobrole.types.Team
 
 @Composable
-fun TeamText(index: Int){
-	Text("Quart temps $index", Modifier.fillMaxWidth().padding(0.dp, 10.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
+fun TeamText(name: String){
+	Text(name, Modifier.fillMaxWidth().padding(0.dp, 10.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 }
 
 @Composable
@@ -29,15 +29,15 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, badgeText: String,
 }
 
 @Composable
-fun QuartCard(modifier: Modifier, points: Points, index: Int){
+fun QuartCard(modifier: Modifier, team: Team, index: Int){
 	val conf = LocalConfiguration.current
 	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 7.dp)) {
-		TeamText(index)
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
-			PointButton({ points.one++ }, { if (points.one > 0) points.one-- }, "${points.one}") { LabelText("1 pt") }
-			PointButton({ points.two++ }, { if(points.two > 0) points.two-- }, "${points.two}") { LabelText("2 pt") }
-			PointButton({ points.three++ }, { if(points.three > 0) points.three-- }, "${points.three}") { LabelText("3 pt") }
-			PointButton({ points.lucille++ }, { if(points.lucille > 0) points.lucille-- }, "${points.lucille}") { LabelText("+L") }
+			PointButton({ team.scores[index].one++ }, { if (team.scores[index].one > 0) team.scores[index].one-- }, "1") { LabelText("${team.scores[index].one}") }
+			PointButton({ team.scores[index].two++ }, { if(team.scores[index].two > 0) team.scores[index].two-- }, "2") { LabelText("${team.scores[index].two}") }
+			PointButton({ team.scores[index].three++ }, { if(team.scores[index].three > 0) team.scores[index].three-- }, "3") { LabelText("${team.scores[index].three}") }
+			PointButton({ team.scores[index].lucille++ }, { if(team.scores[index].lucille > 0) team.scores[index].lucille-- }, "L") { LabelText("${team.scores[index].lucille}") }
 		}
+		TeamText(team.name)
 	}
 }

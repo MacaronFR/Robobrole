@@ -18,12 +18,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import fr.imacaron.robobrole.types.AppState
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun NewMatchScreen(navController: NavController){
+fun NewMatchScreen(navController: NavController, state: AppState){
 	var openLevel by remember { mutableStateOf(false) }
 	var level by remember { mutableStateOf("") }
 	var levelError by remember { mutableStateOf(false) }
@@ -100,6 +101,10 @@ fun NewMatchScreen(navController: NavController){
 						levelError = false
 					}
 					if(ok){
+						state.local.reset()
+						state.visitor.reset()
+						state.local.name = local
+						state.visitor.name = visitor
 						navController.navigate("match"){ popUpTo("home") }
 					}
 				},

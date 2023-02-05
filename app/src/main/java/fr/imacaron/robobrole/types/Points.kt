@@ -1,8 +1,20 @@
 package fr.imacaron.robobrole.types
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+
+@Stable
+class Team{
+    var name: String by mutableStateOf("")
+    val scores: List<Points> = listOf(Points(), Points(), Points(), Points())
+
+    fun reset(){
+        name = ""
+        scores.forEach(Points::reinit)
+    }
+}
 
 class Points{
     var one: Int by mutableStateOf(0)
