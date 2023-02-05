@@ -19,6 +19,12 @@ interface SummaryDAO {
 	@Query("SELECT * FROM summary")
 	fun getAll(): List<Summary>
 
+	@Query("UPDATE summary SET value = value + 1 WHERE team = :team AND key = :key AND quart = :quart")
+	fun incValue(team: String, key: String, quart: Int)
+
+	@Query("UPDATE summary SET value = value - 1 WHERE team = :team AND key = :key AND quart = :quart")
+	fun decValue(team: String, key: String, quart: Int)
+
 	@Insert
 	fun insertSummary(vararg summary: Summary)
 

@@ -5,12 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.db.Type
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty
 
 @Stable
 class Team(db: AppDatabase){
     var name: String by mutableStateOf("")
-    val scores: List<Points> = listOf(Points(db, this), Points(db, this), Points(db, this), Points(db, this))
+    var matchStart: Long by mutableStateOf(0)
+    val scores: List<Points> = listOf(Points(db, this, 1), Points(db, this, 2), Points(db, this, 3), Points(db, this, 4))
 
     fun reset(){
         name = ""
@@ -18,16 +24,28 @@ class Team(db: AppDatabase){
     }
 }
 
-class Point(private val db: AppDatabase, private val team: Team){
+class Point(private val db: AppDatabase, private val team: Team, private val name: String, private val quart: Int){
     private var value: Int by mutableStateOf(0)
+
+    private var inserted: MutableList<Long> = mutableListOf()
 
     operator fun inc(): Point {
         value++
+        println("ici")
+        GlobalScope.launch(Dispatchers.IO){
+            println("ICI")
+            inserted.add(db.matchDao().insertEvent(MatchEvent(Type.Point, team.name, name, (System.currentTimeMillis() / 1000) - team.matchStart)))
+            db.summaryDao().incValue(team.name, name, quart)
+        }
         return this
     }
 
     operator fun dec(): Point {
         value--
+        GlobalScope.launch(Dispatchers.IO) {
+            db.matchDao().deleteEvent(inserted.last())
+            inserted.removeLast()
+        }
         return this
     }
 
@@ -40,15 +58,28 @@ class Point(private val db: AppDatabase, private val team: Team){
     }
 
     operator fun setValue(thisRef: Points, property: KProperty<*>, value: Int){
-        this.value = value
+        println("ICI $value, ${this.value}")
+        GlobalScope.launch(Dispatchers.IO){
+            println("$value, ${this@Point.value}")
+            if(this@Point.value - value == 1){
+                db.matchDao().deleteEvent(inserted.last())
+                inserted.removeLast()
+            }else if(this@Point.value - value == -1){
+                println("ICI")
+                inserted.add(db.matchDao().insertEvent(MatchEvent(Type.Point, team.name, name, (System.currentTimeMillis() / 1000) - team.matchStart)))
+                db.summaryDao().incValue(team.name, name, quart)
+                println(inserted)
+            }
+            this@Point.value = value
+        }
     }
 }
 
-class Points(db: AppDatabase, team: Team){
-    var one: Int by Point(db, team)
-    var two: Int by Point(db, team)
-    var three: Int by Point(db, team)
-    var lucille: Int by Point(db, team)
+class Points(db: AppDatabase, team: Team, quart: Int){
+    var one: Int by Point(db, team, "1", quart)
+    var two: Int by Point(db, team, "2", quart)
+    var three: Int by Point(db, team, "3", quart)
+    var lucille: Int by Point(db, team, "4", quart)
 
     fun tot(): Int = one + two * 2 + three * 3
 

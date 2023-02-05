@@ -9,8 +9,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.MatchEvent
-import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Team
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -45,9 +43,6 @@ fun QuartCard(modifier: Modifier, team: Team, matchStart: Long, index: Int, db: 
 				PointButton(
 					{
 						team.scores[index][it] = team.scores[index][it] + 1
-						GlobalScope.launch(Dispatchers.IO){
-							db.matchDao().insertEvents(MatchEvent(Type.Point, team.name, it, (System.currentTimeMillis() / 1000) - matchStart))
-						}
 					},
 					{
 						if(team.scores[index][it] > 0){

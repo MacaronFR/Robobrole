@@ -34,7 +34,10 @@ interface MatchEventDAO {
 	fun getAll(): List<MatchEvent>
 
 	@Insert
-	fun insertEvents(vararg events: MatchEvent)
+	fun insertEvent(event: MatchEvent): Long
+
+	@Query("DELETE FROM current WHERE uid = :id")
+	fun deleteEvent(id: Long)
 
 	@Delete
 	fun deleteEvents(vararg events: MatchEvent)
