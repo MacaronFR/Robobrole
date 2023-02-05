@@ -1,7 +1,5 @@
 package fr.imacaron.robobrole.match
 
-import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
@@ -23,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.AppState
@@ -36,25 +33,12 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController){
+fun MatchScreen(state: AppState, db: AppDatabase){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
-	var quit by remember { mutableStateOf(false) }
-	val context = LocalContext.current
 	for( i in state.local.scores.indices){
 		anchors[i * -sizePx] = i
-	}
-	BackHandler {
-		if(quit){
-			GlobalScope.launch(Dispatchers.IO){
-				db.matchDao().wipeTable()
-			}
-			nav.navigateUp()
-		}else{
-			quit = true
-			Toast.makeText(context, "Appuyer à nouveau pour quitter (les données seront perdues)", Toast.LENGTH_SHORT).show()
-		}
 	}
 	Column {
 		val swipeState = rememberSwipeableState(0)
@@ -66,7 +50,14 @@ fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController){
 					Text("${state.local.scores[swipeState.currentValue].tot()}    ${state.visitor.scores[swipeState.currentValue].tot()}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 				}
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround) {
-					ElevatedButton({ state.matchStart = System.currentTimeMillis() / 1000 }){ Text("Début du match") }
+					ElevatedButton({
+						val matchStart = System.currentTimeMillis() / 1000
+						state.local.matchStart = matchStart
+						state.visitor.matchStart = matchStart
+						GlobalScope.launch(Dispatchers.IO){
+							db.infoDao().setStart(matchStart, state.infoId)
+						}
+					}){ Text("Début du match") }
 					Button(
 						{
 							GlobalScope.launch(Dispatchers.IO){
@@ -79,17 +70,17 @@ fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController){
 				}
 			}
 		}
-		TeamCards(state.local, state.matchStart, db, size.dp, sizePx, swipeState, anchors)
-		TeamCards(state.visitor, state.matchStart, db, size.dp, sizePx, swipeState, anchors)
+		TeamCards(state.local, size.dp, sizePx, swipeState, anchors)
+		TeamCards(state.visitor, size.dp, sizePx, swipeState, anchors)
 	}
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TeamCards(team: Team, matchStart: Long, db: AppDatabase, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>){
+fun TeamCards(team: Team, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>){
 	Box(Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
 		for(i in team.scores.indices){
-			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, team, matchStart, i, db)
+			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, team, i)
 		}
 	}
 }

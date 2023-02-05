@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.Info
 import fr.imacaron.robobrole.db.Summary
 import fr.imacaron.robobrole.types.AppState
 import kotlinx.coroutines.*
@@ -122,8 +123,10 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 						state.local.name = local
 						state.visitor.name = visitor
 						state.level = level
+						state.gender = if(women) "F" else "M"
 						GlobalScope.launch{
 							initSummary(state, db)
+							db.infoDao().insertInfo(Info(local, visitor, level, if(women) "F" else "H"))
 						}
 						navController.navigate("match"){ popUpTo("home") }
 					}

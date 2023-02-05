@@ -11,13 +11,14 @@ enum class Type(val value: String){
 
 @Entity(tableName = "current")
 data class MatchEvent(
-	@PrimaryKey(true) val uid: Int,
+	@PrimaryKey(true) val uid: Long,
 	@ColumnInfo(name = "type") val type: Type,
 	@ColumnInfo(name = "team") val team: String,
 	@ColumnInfo(name = "data") val data: String,
 	@ColumnInfo(name = "time") val time: Long,
+	@ColumnInfo(name = "quart") val quart: Int,
 ){
-	constructor(type: Type, team: String, data: String, time: Long): this(0, type, team, data, time)
+	constructor(type: Type, team: String, data: String, time: Long, quart: Int): this(0, type, team, data, time, quart)
 }
 
 class Converters {
@@ -30,7 +31,7 @@ class Converters {
 
 @Dao
 interface MatchEventDAO {
-	@Query("SELECT * FROM current")
+	@Query("SELECT * FROM current ORDER BY time")
 	fun getAll(): List<MatchEvent>
 
 	@Insert
@@ -46,10 +47,12 @@ interface MatchEventDAO {
 	fun wipeTable()
 }
 
-@Database(entities = [MatchEvent::class, Summary::class], version = 3)
+@Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 5)
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase(){
 	abstract fun matchDao(): MatchEventDAO
 
 	abstract fun summaryDao(): SummaryDAO
+
+	abstract fun infoDao(): InfoDAO
 }

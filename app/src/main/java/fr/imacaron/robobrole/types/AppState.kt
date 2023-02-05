@@ -8,7 +8,9 @@ import fr.imacaron.robobrole.db.AppDatabase
 @Stable
 class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 
-	var matchStart: Long by mutableStateOf(0)
+	var infoId: Long by mutableStateOf(0)
+
+	var gender: String by mutableStateOf("F")
 
 	val local: Team by mutableStateOf(Team(db))
 

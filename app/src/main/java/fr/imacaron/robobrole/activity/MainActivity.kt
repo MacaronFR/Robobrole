@@ -49,9 +49,9 @@ class MainActivity : ComponentActivity() {
 					topBar = { AppBar(appState) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("home"){ HomeScreen(navController, db) }
+						composable("home"){ HomeScreen(navController, db, appState) }
 						composable("new_match"){ NewMatchScreen(navController, appState, db) }
-						composable("match"){ MatchScreen(appState, db, navController) }
+						composable("match"){ MatchScreen(appState, db) }
 					}
 				}
 			}
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 
 	suspend fun save(state: AppState) {
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-		val initName = "${state.local.name}-${state.visitor.name}-${state.level}"
+		val initName = "${state.local.name}-${state.visitor.name}-${state.level}${state.gender}"
 		var name = "$initName.csv"
 		var index = 0
 		val fileNames = dir.listFiles()?.map { it.name } ?: listOf()
@@ -90,10 +90,10 @@ class MainActivity : ComponentActivity() {
 
 	private fun getCsv(): String {
 		val res = StringBuilder()
-		res.appendLine("Type;Équipe;Data;Time")
+		res.appendLine("Type;Équipe;Data;Time;Quart")
 		val events = db.matchDao().getAll()
 		events.forEach { e ->
-			res.appendLine("${e.type};${e.team};${e.data};${e.time}")
+			res.appendLine("${e.type};${e.team};${e.data};${e.time};${e.quart}")
 		}
 		return res.toString()
 	}

@@ -8,12 +8,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.components.ButtonLong
-import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.Team
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun TeamText(name: String){
@@ -35,23 +31,37 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, badgeText: String,
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun QuartCard(modifier: Modifier, team: Team, matchStart: Long, index: Int, db: AppDatabase){
+fun QuartCard(modifier: Modifier, team: Team, index: Int){
 	val conf = LocalConfiguration.current
 	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 7.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(
 					{
-						team.scores[index][it] = team.scores[index][it] + 1
+						team.scores[index].apply {
+							when(it){
+								"1" -> one++
+								"2" -> two++
+								"3" -> three++
+								"L" -> lucille++
+							}
+						}
 					},
 					{
 						if(team.scores[index][it] > 0){
-							team.scores[index][it] = team.scores[index][it] - 1
+							team.scores[index].apply {
+								when(it){
+									"1" -> one--
+									"2" -> two--
+									"3" -> three--
+									"L" -> lucille--
+								}
+							}
 						}
 					},
 					it
 				){
-					LabelText("${team.scores[index][it]}")
+					LabelText("${team.scores[index][it].value}")
 				}
 			}
 		}
