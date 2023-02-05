@@ -8,7 +8,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.components.ButtonLong
+import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Team
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun TeamText(name: String){
@@ -28,15 +35,30 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, badgeText: String,
 	}
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun QuartCard(modifier: Modifier, team: Team, index: Int){
+fun QuartCard(modifier: Modifier, team: Team, matchStart: Long, index: Int, db: AppDatabase){
 	val conf = LocalConfiguration.current
 	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 7.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
-			PointButton({ team.scores[index].one++ }, { if (team.scores[index].one > 0) team.scores[index].one-- }, "1") { LabelText("${team.scores[index].one}") }
-			PointButton({ team.scores[index].two++ }, { if(team.scores[index].two > 0) team.scores[index].two-- }, "2") { LabelText("${team.scores[index].two}") }
-			PointButton({ team.scores[index].three++ }, { if(team.scores[index].three > 0) team.scores[index].three-- }, "3") { LabelText("${team.scores[index].three}") }
-			PointButton({ team.scores[index].lucille++ }, { if(team.scores[index].lucille > 0) team.scores[index].lucille-- }, "L") { LabelText("${team.scores[index].lucille}") }
+			listOf("1", "2", "3", "L").forEach {
+				PointButton(
+					{
+						team.scores[index][it] = team.scores[index][it] + 1
+						GlobalScope.launch(Dispatchers.IO){
+							db.matchDao().insertEvents(MatchEvent(Type.Point, team.name, it, (System.currentTimeMillis() / 1000) - matchStart))
+						}
+					},
+					{
+						if(team.scores[index][it] > 0){
+							team.scores[index][it] = team.scores[index][it] - 1
+						}
+					},
+					it
+				){
+					LabelText("${team.scores[index][it]}")
+				}
+			}
 		}
 		TeamText(team.name)
 	}

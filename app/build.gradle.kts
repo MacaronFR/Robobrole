@@ -2,7 +2,7 @@ plugins {
 	id("com.android.application")
 	id("org.jetbrains.kotlin.android")
 	id("kotlin-kapt")
-	id("com.google.devtools.ksp").version("1.6.21-1.0.5")
+	id("com.google.devtools.ksp").version("1.8.0-1.0.9")
 }
 
 val compose_ui_version = "1.3.3"
@@ -62,7 +62,7 @@ dependencies {
 	implementation("androidx.navigation:navigation-compose:2.5.3")
 	implementation("androidx.room:room-runtime:$room_version")
 	annotationProcessor("androidx.room:room-compiler:$room_version")
-	kapt("androidx.room:room-compiler:$room_version")
+//	kapt("androidx.room:room-compiler:$room_version")
 	ksp("androidx.room:room-compiler:$room_version")
 	testImplementation("junit:junit:4.13.2")
 	androidTestImplementation("androidx.test.ext:junit:1.1.5")

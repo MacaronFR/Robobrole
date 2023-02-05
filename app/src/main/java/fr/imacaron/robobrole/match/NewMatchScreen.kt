@@ -1,5 +1,6 @@
 package fr.imacaron.robobrole.match
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -12,33 +13,43 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import fr.imacaron.robobrole.R
+import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.Summary
 import fr.imacaron.robobrole.types.AppState
+import kotlinx.coroutines.*
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun NewMatchScreen(navController: NavController, state: AppState){
+fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabase){
 	var openLevel by remember { mutableStateOf(false) }
 	var level by remember { mutableStateOf("") }
 	var levelError by remember { mutableStateOf(false) }
-	var local by remember { mutableStateOf("") }
+	var local by remember { mutableStateOf("Bois le roi") }
 	var localError by remember { mutableStateOf(false) }
 	var visitor by remember { mutableStateOf("") }
 	var visitorError by remember { mutableStateOf(false) }
 	var women by remember { mutableStateOf(true) }
+	var switch by remember { mutableStateOf(false) }
+	val rotate by animateFloatAsState(if (switch) 270f else 90f)
 	val focus = LocalFocusManager.current
 	val keyboard = LocalSoftwareKeyboardController.current
 	Column {
 		Card(defaultModifier) {
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
-			Column{
+			Column(horizontalAlignment = Alignment.CenterHorizontally){
 				OutlinedTextField(
 					local,
 					{ local = it },
@@ -47,7 +58,12 @@ fun NewMatchScreen(navController: NavController, state: AppState){
 					isError = localError,
 					keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
 					singleLine = true)
-				Text("VS", defaultModifier, textAlign = TextAlign.Center)
+				Icon(ImageVector.vectorResource(R.drawable.sync), null, Modifier.clip(MaterialTheme.shapes.extraLarge).rotate(rotate).clickable {
+					switch = !switch
+					val tmp = local
+					local = visitor
+					visitor = tmp
+				}.padding(8.dp))
 				OutlinedTextField(visitor,
 					{ visitor = it },
 					defaultModifier,
@@ -105,6 +121,10 @@ fun NewMatchScreen(navController: NavController, state: AppState){
 						state.visitor.reset()
 						state.local.name = local
 						state.visitor.name = visitor
+						state.level = level
+						GlobalScope.launch{
+							initSummary(state, db)
+						}
 						navController.navigate("match"){ popUpTo("home") }
 					}
 				},
@@ -113,5 +133,28 @@ fun NewMatchScreen(navController: NavController, state: AppState){
 				Text("Créer le match")
 			}
 		}
+	}
+}
+
+suspend fun initSummary(state: AppState, db: AppDatabase){
+	val key = listOf("1", "2", "3", "L")
+	val summaries = mutableListOf<Summary>()
+	with(state.local.name){
+		key.forEach { k ->
+			for( quart in 1..4){
+				summaries.add(Summary(this@with, k, quart, 0))
+			}
+		}
+	}
+	with(state.visitor.name){
+		key.forEach { k ->
+			for( quart in 1..4){
+				summaries.add(Summary(this@with, k, quart, 0))
+			}
+		}
+	}
+	withContext(Dispatchers.IO){
+		db.summaryDao().wipeTable()
+		db.summaryDao().insertSummary(summaries)
 	}
 }

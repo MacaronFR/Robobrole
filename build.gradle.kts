@@ -1,7 +1,3 @@
-buildscript {
-    val compose_ui_version = "1.3.3"
-}
-
 plugins {
     id("com.android.application") version "7.3.0" apply false
     id("com.android.library") version "7.3.0" apply false

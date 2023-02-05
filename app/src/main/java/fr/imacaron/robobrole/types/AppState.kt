@@ -3,13 +3,18 @@ package fr.imacaron.robobrole.types
 import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.core.content.edit
+import fr.imacaron.robobrole.db.AppDatabase
 
 @Stable
-class AppState(sharedPref: SharedPreferences) {
+class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 
-	val local: Team by mutableStateOf(Team())
+	var matchStart: Long by mutableStateOf(0)
 
-	val visitor: Team by mutableStateOf(Team())
+	val local: Team by mutableStateOf(Team(db))
+
+	val visitor: Team by mutableStateOf(Team(db))
+
+	var level: String by mutableStateOf("")
 
 	val sharedPref: SharedPreferences by mutableStateOf(sharedPref)
 	var theme: Theme by mutableStateOf(Theme.values()[sharedPref.getInt("theme", Theme.Default.value)])
