@@ -33,7 +33,7 @@ interface InfoDAO {
 	@Query("SELECT * FROM info WHERE done = false")
 	fun getCurrent(): Info?
 
-	@Query("SELECT * FROM info WHERE done = true")
+	@Query("SELECT * FROM info WHERE done = true ORDER by uid DESC")
 	fun getSaved(): List<Info>
 
 	@Query("DELETE FROM info")
