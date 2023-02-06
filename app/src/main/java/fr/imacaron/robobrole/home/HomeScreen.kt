@@ -36,7 +36,10 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 		Card(Modifier.fillMaxWidth().padding(8.dp)) {
 			Row(Modifier.padding(8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
 				Button(
-					{ navController.navigate("match/${current}") },
+					{
+						matchState.clean()
+						navController.navigate("match/${current}")
+					},
 					enabled = current != -1L
 				){
 					Text("Continuer le match")
@@ -75,11 +78,11 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 					}
 					Row(Modifier.padding(8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
 						Column {
-							Text("${history[index].local} - ${history[index].visitor} | ${history[index].level}${history[index].gender}", style = MaterialTheme.typography.titleMedium)
+							Text("${history[index].local} - ${history[index].visitor} | ${history[index].level}${history[index].gender.value}", style = MaterialTheme.typography.titleMedium)
 							Text("${history[index].date.dayOfMonth}/${history[index].date.monthValue}/${history[index].date.year}")
 						}
 						Button({
-							println(history[index].uid)
+							matchState.clean()
 							navController.navigate("match/${history[index].uid}")
 						}){
 							Text("Voir plus")

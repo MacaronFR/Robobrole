@@ -34,7 +34,7 @@ val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
 class NewMatchScreenState{
 	var openLevel: Boolean by mutableStateOf(false)
-	var level: String by mutableStateOf("")
+	var level: String by mutableStateOf("Senior")
 	var levelError: Boolean by mutableStateOf(false)
 	var local: String by mutableStateOf("Bois le roi")
 	var localError: Boolean by mutableStateOf(false)
@@ -93,6 +93,10 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 				Box(defaultModifier){
 					OutlinedTextField(newMatchScreenState.level, {}, Modifier.fillMaxWidth(), label = { Text("Niveau") }, trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, isError = newMatchScreenState.levelError)
 					DropdownMenu(newMatchScreenState.openLevel, { newMatchScreenState.openLevel = false }, Modifier.fillMaxWidth(0.6f)){
+						DropdownMenuItem({ Text("U9")}, { newMatchScreenState.level = "U9"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("U11")}, { newMatchScreenState.level = "U11"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("U13")}, { newMatchScreenState.level = "U13"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("U15")}, { newMatchScreenState.level = "U15"; newMatchScreenState.openLevel = false })
 						DropdownMenuItem({ Text("U17")}, { newMatchScreenState.level = "U17"; newMatchScreenState.openLevel = false })
 						DropdownMenuItem({ Text("U18")}, { newMatchScreenState.level = "U18"; newMatchScreenState.openLevel = false })
 						DropdownMenuItem({ Text("U20")}, { newMatchScreenState.level = "U20"; newMatchScreenState.openLevel = false })
