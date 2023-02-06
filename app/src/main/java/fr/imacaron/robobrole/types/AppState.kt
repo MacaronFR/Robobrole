@@ -4,9 +4,12 @@ import android.content.SharedPreferences
 import androidx.compose.runtime.*
 import androidx.core.content.edit
 import fr.imacaron.robobrole.db.AppDatabase
+import java.time.LocalDate
 
 @Stable
 class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
+
+	var date: LocalDate by mutableStateOf(LocalDate.now())
 
 	var home: Boolean by mutableStateOf(false)
 

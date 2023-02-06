@@ -84,7 +84,10 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, state: AppState){
 						Divider(Modifier.fillMaxWidth().padding(16.dp, 0.dp), 1.dp, MaterialTheme.colorScheme.outline)
 					}
 					Row(Modifier.padding(8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-						Text("${history[index].local} ${history[index].visitor} ${history[index].level}${history[index].gender}", style = MaterialTheme.typography.titleMedium)
+						Column {
+							Text("${history[index].local} - ${history[index].visitor} | ${history[index].level}${history[index].gender}", style = MaterialTheme.typography.titleMedium)
+							Text("${history[index].date.dayOfMonth}/${history[index].date.monthValue}/${history[index].date.year}")
+						}
 						Button({
 							GlobalScope.launch(Dispatchers.IO) {
 								reloadInfo(state, history[index])

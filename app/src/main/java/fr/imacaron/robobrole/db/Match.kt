@@ -54,8 +54,8 @@ interface MatchEventDAO {
 	fun wipeTable()
 }
 
-@Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 5)
-@TypeConverters(Converters::class)
+@Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 6)
+@TypeConverters(Converters::class, LocalDateConverters::class)
 abstract class AppDatabase: RoomDatabase(){
 	abstract fun matchDao(): MatchEventDAO
 
