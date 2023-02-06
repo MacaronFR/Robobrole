@@ -27,6 +27,7 @@ import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.types.Team
+import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,14 +36,14 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController){
+fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController, uiState: UIState){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
 	for( i in state.local.scores.indices){
 		anchors[i * -sizePx] = i
 	}
-	state.home = false
+	uiState.home = false
 	Column {
 		val swipeState = rememberSwipeableState(0)
 		val activity = LocalContext.current as MainActivity

@@ -15,16 +15,17 @@ import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Info
 import fr.imacaron.robobrole.db.MatchEvent
 import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun  HomeScreen(navController: NavController, db: AppDatabase, state: AppState){
+fun  HomeScreen(navController: NavController, db: AppDatabase, state: AppState, uiState: UIState){
 	val context = LocalContext.current as MainActivity
 	var confirm: Boolean by remember { mutableStateOf(false) }
 	var history: List<Info> by remember { mutableStateOf(listOf()) }
-	state.home = true
-	LaunchedEffect(state.alert, state.infoId){
+	uiState.home = true
+	LaunchedEffect(uiState.alert, state.infoId){
 		withContext(Dispatchers.IO){
 			history = db.infoDao().getSaved()
 		}

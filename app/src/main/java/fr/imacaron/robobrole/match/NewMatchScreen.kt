@@ -28,13 +28,14 @@ import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Info
 import fr.imacaron.robobrole.db.Summary
 import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabase){
+fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabase, uiState: UIState){
 	var openLevel by remember { mutableStateOf(false) }
 	var level by remember { mutableStateOf("") }
 	var levelError by remember { mutableStateOf(false) }
@@ -47,7 +48,7 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 	val rotate by animateFloatAsState(if (switch) 270f else 90f)
 	val focus = LocalFocusManager.current
 	val keyboard = LocalSoftwareKeyboardController.current
-	state.home = false
+	uiState.home = false
 	Column {
 		Card(defaultModifier) {
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)

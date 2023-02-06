@@ -22,18 +22,20 @@ import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.types.Theme
+import fr.imacaron.robobrole.types.UIState
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun AppBar(appState: AppState, db: AppDatabase, nav: NavController){
+fun AppBar(appState: AppState, db: AppDatabase, nav: NavController, uiState: UIState){
 	val activity = LocalContext.current as MainActivity
 	TopAppBar(
 		title = { Text("Robobrole") },
 		navigationIcon = {
-			if(!appState.home){
+			if(!uiState.home){
 				IconButton({
 					nav.navigateUp()
 				}){
@@ -62,7 +64,7 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController){
 					Icon(ImageVector.vectorResource(R.drawable.moon), null)
 				}
 			}
-			if(appState.done && appState.infoId != 0L && !appState.home){
+			if(appState.done && appState.infoId != 0L && !uiState.home){
 				IconButton(
 					{
 						GlobalScope.launch(Dispatchers.IO) {
@@ -74,10 +76,10 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController){
 				}
 			}
 			Box{
-				IconButton({appState.toggleMenu()}){
+				IconButton({uiState.toggleMenu()}){
 					Icon(Icons.Filled.MoreVert, null)
 				}
-				DropdownMenu(expanded = appState.displayMenu, onDismissRequest = { appState.closeMenu() }){
+				DropdownMenu(expanded = uiState.displayMenu, onDismissRequest = { uiState.closeMenu() }){
 					DropdownMenuItem(
 						text = { Text(if(appState.left) "Gaucher" else "Droitier") },
 						onClick = {
@@ -92,14 +94,14 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController){
 					)
 					DropdownMenuItem(
 						text = { Text("Supprimer toutes les données") },
-						onClick = { appState.alert = true },
+						onClick = { uiState.alert = true },
 						leadingIcon = { Icon(Icons.Default.Delete, null)}
 					)
 				}
-				if(appState.alert){
+				if(uiState.alert){
 					AlertDialog(
 						{
-							appState.alert = false
+							uiState.alert = false
 						},
 						{
 							Button({
@@ -108,12 +110,12 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController){
 									db.summaryDao().wipeTable()
 									db.matchDao().wipeTable()
 									activity.removeAllSave()
-									appState.alert = false
-									appState.displayMenu = false
+									uiState.alert = false
+									uiState.closeMenu()
 								}
 							}){ Text("Supprimer") }
 						},
-						dismissButton = { Button({ appState.alert = false }){ Text("Annuler") } },
+						dismissButton = { Button({ uiState.alert = false }){ Text("Annuler") } },
 						icon = { Icon(Icons.Default.Delete, null) },
 						title = { Text("Supprimer toute les données") },
 						text = { Text("Êtes vous sur de vouloir supprimer toutes les données.\nCette action est irréversible") },

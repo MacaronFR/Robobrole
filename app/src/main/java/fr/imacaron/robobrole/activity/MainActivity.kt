@@ -21,6 +21,7 @@ import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.match.StatScreen
 import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.UIState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -44,16 +45,17 @@ class MainActivity : ComponentActivity() {
 		).fallbackToDestructiveMigration().build()
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 		val appState = AppState(sharedPref, db)
+		val uiState = UIState()
 		setContent {
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = appState.theme) {
 				Scaffold(
-					topBar = { AppBar(appState, db, navController) },
+					topBar = { AppBar(appState, db, navController, uiState) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("home"){ HomeScreen(navController, db, appState) }
-						composable("new_match"){ NewMatchScreen(navController, appState, db) }
-						composable("match"){ MatchScreen(appState, db, navController) }
+						composable("home"){ HomeScreen(navController, db, appState, uiState) }
+						composable("new_match"){ NewMatchScreen(navController, appState, db, uiState) }
+						composable("match"){ MatchScreen(appState, db, navController, uiState) }
 						composable("stat"){ StatScreen(appState, db) }
 					}
 				}

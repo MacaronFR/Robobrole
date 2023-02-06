@@ -11,10 +11,6 @@ class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 
 	var date: LocalDate by mutableStateOf(LocalDate.now())
 
-	var home: Boolean by mutableStateOf(false)
-
-	var alert: Boolean by mutableStateOf(false)
-
 	var left: Boolean by mutableStateOf(sharedPref.getBoolean("left", false))
 		private set
 
@@ -33,7 +29,7 @@ class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 	val sharedPref: SharedPreferences by mutableStateOf(sharedPref)
 	var theme: Theme by mutableStateOf(Theme.values()[sharedPref.getInt("theme", Theme.Default.value)])
 		private set
-	var displayMenu: Boolean by mutableStateOf(false)
+
 
 	fun setLightTheme(setPref: Boolean = true){
 		theme = Theme.Light
@@ -67,13 +63,5 @@ class AppState(sharedPref: SharedPreferences, db: AppDatabase) {
 		sharedPref.edit {
 			putBoolean("left", left)
 		}
-	}
-
-	fun toggleMenu(){
-		displayMenu = !displayMenu
-	}
-
-	fun closeMenu(){
-		displayMenu = false
 	}
 }
