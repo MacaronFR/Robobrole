@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
 		val f = openFileInput(id.toString())
 		val data = f.readAllBytes().toString(Charset.defaultCharset())
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-		val initName = "${state.local.name}-${state.visitor.name}-${state.level}-${state.gender}-${state.date.dayOfMonth}/${state.date.monthValue}/${state.date.year}"
+		val initName = "${state.local.name}-${state.visitor.name}-${state.level}-${state.gender}-${state.date.dayOfMonth}-${state.date.monthValue}-${state.date.year}"
 		var name = "$initName.csv"
 		var index = 0
 		val fileNames = dir.listFiles()?.map { it.name } ?: listOf()
@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
 			}
 		} catch (e: IOException) {
 			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Erreur lors de la sauvegarde", Toast.LENGTH_SHORT).show()
+				Toast.makeText(baseContext, "Erreur lors de l'exportation", Toast.LENGTH_SHORT).show()
 			}
 			e.printStackTrace()
 		}
