@@ -19,6 +19,7 @@ import fr.imacaron.robobrole.components.AppBar
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
+import fr.imacaron.robobrole.match.StatScreen
 import fr.imacaron.robobrole.types.AppState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,8 @@ class MainActivity : ComponentActivity() {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, appState) }
 						composable("new_match"){ NewMatchScreen(navController, appState, db) }
-						composable("match"){ MatchScreen(appState, db) }
+						composable("match"){ MatchScreen(appState, db, navController) }
+						composable("stat"){ StatScreen(appState, db) }
 					}
 				}
 			}

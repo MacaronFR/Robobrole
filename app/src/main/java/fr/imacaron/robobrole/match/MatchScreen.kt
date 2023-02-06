@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.AppState
@@ -34,7 +35,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun MatchScreen(state: AppState, db: AppDatabase){
+fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
@@ -78,6 +79,11 @@ fun MatchScreen(state: AppState, db: AppDatabase){
 						Text("Q${swipeState.targetValue+1}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 					}
 					TeamInfo(state.visitor, swipeState.targetValue)
+				}
+			}
+			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
+				Button({ nav.navigate("stat") }, Modifier.padding(8.dp)){
+					Text("Statistique")
 				}
 			}
 		}
