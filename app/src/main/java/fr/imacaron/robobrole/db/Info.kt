@@ -1,6 +1,7 @@
 package fr.imacaron.robobrole.db
 
 import androidx.room.*
+import fr.imacaron.robobrole.types.Gender
 import java.time.LocalDate
 import java.util.*
 
@@ -10,15 +11,15 @@ data class Info(
 	@ColumnInfo(name = "local") val local: String,
 	@ColumnInfo(name = "visitor") val visitor: String,
 	@ColumnInfo(name = "level") val level: String,
-	@ColumnInfo(name = "gender") val gender: String,
+	@ColumnInfo(name = "gender") val gender: Gender,
 	@ColumnInfo(name = "match_start") val matchStart: Long,
 	@ColumnInfo(name = "done") val done: Boolean,
 	@ColumnInfo(name = "data") val date: LocalDate
 ){
-	constructor(local: String, visitor: String, level: String, gender: String): this(0, local, visitor, level, gender, 0, false, LocalDate.now())
+	constructor(local: String, visitor: String, level: String, gender: Gender): this(0, local, visitor, level, gender, 0, false, LocalDate.now())
 }
 
-class LocalDateConverters{
+class LocalDateConverters {
 
 	@TypeConverter
 	fun fromLocalDate(date: LocalDate): String = "${date.dayOfMonth}/${date.monthValue}/${date.year}"
@@ -53,4 +54,7 @@ interface InfoDAO {
 
 	@Query("DELETE FROM info")
 	fun removeAll()
+
+	@Query("SELECT * FROM info WHERE uid = :id")
+	fun get(id: Long): Info
 }

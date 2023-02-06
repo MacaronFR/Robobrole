@@ -25,9 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.types.AppState
-import fr.imacaron.robobrole.types.Team
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.types.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -36,38 +35,58 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController, uiState: UIState){
+fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiState: UIState, current: Long, left: Boolean){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
-	for( i in state.local.scores.indices){
+	for( i in matchState.localSummary.indices){
 		anchors[i * -sizePx] = i
 	}
+	val activity = LocalContext.current as MainActivity
 	uiState.home = false
+	LaunchedEffect(uiState.home){
+		println("Coroutine")
+		GlobalScope.launch(Dispatchers.IO) {
+			matchState.loadFromInfo(db.infoDao().get(current))
+			val events = if(matchState.done){
+				val data = activity.loadFile(matchState.current).lines().toMutableList()
+				data.removeFirst()
+				data.removeIf { it.isEmpty() }
+				data.map {
+					MatchEvent(it)
+				}
+			}else{
+				db.matchDao().getAll()
+			}
+			matchState.loadEvents(events)
+			uiState.export = matchState.done
+			println(matchState.done)
+		}
+	}
 	Column {
 		val swipeState = rememberSwipeableState(0)
-		val activity = LocalContext.current as MainActivity
 		Column(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
 			Card(Modifier.padding(0.dp, 8.dp)) {
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround){
 					ElevatedButton(
 						{
 							val matchStart = System.currentTimeMillis() / 1000
-							state.local.matchStart = matchStart
-							state.visitor.matchStart = matchStart
+							matchState.startAt = matchStart
 							GlobalScope.launch(Dispatchers.IO){
-								db.infoDao().setStart(matchStart, state.infoId)
+								db.infoDao().setStart(matchStart, matchState.current)
 							}
 						},
-						enabled = state.local.matchStart == 0L && !state.done
+						enabled = matchState.startAt == 0L && !matchState.done
 					){ Text("Début du match") }
 					Button(
 						{
+							matchState.done = true
+							uiState.export = true
 							GlobalScope.launch(Dispatchers.IO){
-								activity.save(state)
+								activity.save(matchState)
 							}
 						},
-						enabled = !state.done
+						enabled = !matchState.done && matchState.startAt != 0L
 					){
 						Text("Sauvegarder")
 					}
@@ -75,11 +94,11 @@ fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController, uiState: U
 			}
 			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
 				Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-					TeamInfo(state.local, swipeState.targetValue)
+					TeamInfo(matchState.local, matchState.localSummary, swipeState.targetValue)
 					Column(Modifier.weight(0.10f)) {
 						Text("Q${swipeState.targetValue+1}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 					}
-					TeamInfo(state.visitor, swipeState.targetValue)
+					TeamInfo(matchState.visitor, matchState.visitorSummary, swipeState.targetValue)
 				}
 			}
 			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
@@ -88,28 +107,29 @@ fun MatchScreen(state: AppState, db: AppDatabase, nav: NavController, uiState: U
 				}
 			}
 		}
-		Column(Modifier.padding(0.dp, 8.dp)) {
-			TeamCards(state.local, size.dp, sizePx, swipeState, anchors, state.gender == "F", state.left, state.done)
-			TeamCards(state.visitor, size.dp, sizePx, swipeState, anchors, state.gender == "F", state.left, state.done)
-		}
+		TeamCards(matchState, size.dp, sizePx, swipeState, anchors, left)
 	}
 }
 
 @Composable
-fun RowScope.TeamInfo(team: Team, quart: Int){
+fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 	Column(Modifier.weight(0.45f)) {
-		Text(team.name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
-		Text(team.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
-		Text(team.scores[quart].tot().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+		Text(name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
+		Text(summary.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+		Text(summary[quart].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
 	}
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TeamCards(team: Team, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>, women: Boolean, left: Boolean, done: Boolean){
-	Box(Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
-		for(i in team.scores.indices){
-			QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, team, i, women, left, done)
+fun TeamCards(matchState: MatchState, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>, left: Boolean){
+	Box(Modifier.padding(0.dp, 8.dp, 0.dp, 16.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
+		for(i in matchState.localSummary.indices){
+			Column {
+				println(i)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.local, i + 1, left)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.visitor, i + 1, left)
+			}
 		}
 	}
 }

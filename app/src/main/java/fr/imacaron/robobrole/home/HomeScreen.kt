@@ -13,51 +13,40 @@ import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Info
-import fr.imacaron.robobrole.db.MatchEvent
-import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.MatchState
 import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun  HomeScreen(navController: NavController, db: AppDatabase, state: AppState, uiState: UIState){
+fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState, matchState: MatchState){
 	val context = LocalContext.current as MainActivity
 	var confirm: Boolean by remember { mutableStateOf(false) }
 	var history: List<Info> by remember { mutableStateOf(listOf()) }
+	var current: Long by remember { mutableStateOf(-1) }
 	uiState.home = true
-	LaunchedEffect(uiState.alert, state.infoId){
+	uiState.export = false
+	LaunchedEffect(uiState.alert){
 		withContext(Dispatchers.IO){
 			history = db.infoDao().getSaved()
+			current = db.infoDao().getCurrent()?.uid ?: -1
 		}
 	}
 	Column {
 		Card(Modifier.fillMaxWidth().padding(8.dp)) {
-		Row(Modifier.padding(8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-			Button(
-				{
-					GlobalScope.launch(Dispatchers.IO){
-						db.infoDao().getCurrent()?.let { info ->
-							reloadInfo(state, info)
-							reloadSummary(state, db)
-							reloadEvent(state, db)
-							withContext(Dispatchers.Main){
-								navController.navigate("match")
-							}
-						} ?: withContext(Dispatchers.Main){
-							Toast.makeText(context, "Aucun match en cours", Toast.LENGTH_SHORT).show()
-						}
-					}
-				},
-				enabled = state.infoId != 0L && !state.done,
-			){
-				Text("Continuer le match")
-			}
+			Row(Modifier.padding(8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+				Button(
+					{ navController.navigate("match/${current}") },
+					enabled = current != -1L
+				){
+					Text("Continuer le match")
+				}
 				Button({
 					GlobalScope.launch(Dispatchers.IO){
 						if(confirm || db.infoDao().getCurrent() == null){
 							db.matchDao().wipeTable()
-							db.summaryDao().wipeTable()
 							db.infoDao().deleteCurrent()
+							matchState.clean()
 							withContext(Dispatchers.Main){
 								navController.navigate("new_match")
 							}
@@ -90,89 +79,12 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, state: AppState, 
 							Text("${history[index].date.dayOfMonth}/${history[index].date.monthValue}/${history[index].date.year}")
 						}
 						Button({
-							GlobalScope.launch(Dispatchers.IO) {
-								reloadInfo(state, history[index])
-								val data = context.loadFile(history[index].uid)
-								reloadFromFile(state, data)
-								withContext(Dispatchers.Main){
-									navController.navigate("match")
-								}
-							}
+							println(history[index].uid)
+							navController.navigate("match/${history[index].uid}")
 						}){
 							Text("Voir plus")
 						}
 					}
-				}
-			}
-		}
-	}
-}
-
-suspend fun reloadFromFile(state: AppState, data: String){
-	val lines = data.lineSequence().iterator()
-	lines.next()
-	while(lines.hasNext()){
-		val s = lines.next()
-		if(s.isEmpty()){
-			continue
-		}
-		val e = MatchEvent(s)
-		val team = if(state.local.name == e.team){
-			state.local
-		}else {
-			state.visitor
-		}
-		team.scores[e.quart-1].apply {
-			when(e.data){
-				"1" -> one += 1
-				"2" -> two += 1
-				"3" -> three += 1
-				"L" -> lucille += 1
-			}
-		}
-	}
-}
-
-suspend fun reloadInfo(state: AppState, info: Info){
-	withContext(Dispatchers.IO){
-		state.local.name = info.local
-		state.local.matchStart = info.matchStart
-		state.gender = info.gender
-		state.visitor.name = info.visitor
-		state.visitor.matchStart = info.matchStart
-		state.level = info.level
-		state.infoId = info.uid
-		state.done = info.done
-	}
-}
-
-suspend fun reloadSummary(state: AppState, db: AppDatabase){
-	withContext(Dispatchers.IO){
-		db.summaryDao().getAll().forEach {
-			val team = if(it.team == state.local.name){
-				state.local
-			}else {
-				state.visitor
-			}
-			team.scores[it.quart-1][it.key] = it.value
-		}
-	}
-}
-
-suspend fun reloadEvent(state: AppState, db: AppDatabase){
-	withContext(Dispatchers.IO){
-		db.matchDao().getAll().forEach {
-			val team = if(state.local.name == it.team){
-				state.local
-			}else {
-				state.visitor
-			}
-			team.scores[it.quart-1].apply {
-				when(it.data){
-					"1" -> one.reloadId(it.uid)
-					"2" -> two.reloadId(it.uid)
-					"3" -> three.reloadId(it.uid)
-					"L" -> lucille.reloadId(it.uid)
 				}
 			}
 		}

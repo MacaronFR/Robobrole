@@ -26,26 +26,29 @@ import androidx.navigation.NavController
 import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Info
-import fr.imacaron.robobrole.db.Summary
-import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
+class NewMatchScreenState{
+	var openLevel: Boolean by mutableStateOf(false)
+	var level: String by mutableStateOf("")
+	var levelError: Boolean by mutableStateOf(false)
+	var local: String by mutableStateOf("Bois le roi")
+	var localError: Boolean by mutableStateOf(false)
+	var visitor: String by mutableStateOf("")
+	var visitorError: Boolean by mutableStateOf(false)
+	var women: Boolean by mutableStateOf(true)
+	var switch: Boolean by mutableStateOf(false)
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabase, uiState: UIState){
-	var openLevel by remember { mutableStateOf(false) }
-	var level by remember { mutableStateOf("") }
-	var levelError by remember { mutableStateOf(false) }
-	var local by remember { mutableStateOf("Bois le roi") }
-	var localError by remember { mutableStateOf(false) }
-	var visitor by remember { mutableStateOf("") }
-	var visitorError by remember { mutableStateOf(false) }
-	var women by remember { mutableStateOf(true) }
-	var switch by remember { mutableStateOf(false) }
-	val rotate by animateFloatAsState(if (switch) 270f else 90f)
+fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UIState){
+	val newMatchScreenState = NewMatchScreenState()
+	val rotate by animateFloatAsState(if (newMatchScreenState.switch) 270f else 90f)
 	val focus = LocalFocusManager.current
 	val keyboard = LocalSoftwareKeyboardController.current
 	uiState.home = false
@@ -54,24 +57,24 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 			Column(horizontalAlignment = Alignment.CenterHorizontally){
 				OutlinedTextField(
-					local,
-					{ local = it },
+					newMatchScreenState.local,
+					{ newMatchScreenState.local = it },
 					defaultModifier,
 					label = { Text("Locaux") },
-					isError = localError,
+					isError = newMatchScreenState.localError,
 					keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
 					singleLine = true)
 				Icon(ImageVector.vectorResource(R.drawable.sync), null, Modifier.clip(MaterialTheme.shapes.extraLarge).rotate(rotate).clickable {
-					switch = !switch
-					val tmp = local
-					local = visitor
-					visitor = tmp
+					newMatchScreenState.switch = !newMatchScreenState.switch
+					val tmp = newMatchScreenState.local
+					newMatchScreenState.local = newMatchScreenState.visitor
+					newMatchScreenState.visitor = tmp
 				}.padding(8.dp))
-				OutlinedTextField(visitor,
-					{ visitor = it },
+				OutlinedTextField(newMatchScreenState.visitor,
+					{ newMatchScreenState.visitor = it },
 					defaultModifier,
 					label = { Text("Visiteurs") },
-					isError = visitorError,
+					isError = newMatchScreenState.visitorError,
 					keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
 					keyboardActions = KeyboardActions(onNext = {
 						keyboard?.hide(); focus.clearFocus()
@@ -79,59 +82,54 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 					singleLine = true)
 				Row(defaultModifier, horizontalArrangement = Arrangement.SpaceAround) {
 					Row(verticalAlignment = Alignment.CenterVertically) {
-						RadioButton(!women, { women = false })
+						RadioButton(!newMatchScreenState.women, { newMatchScreenState.women = false })
 						Text("Masculin")
 					}
 					Row(verticalAlignment = Alignment.CenterVertically) {
-						RadioButton(women, { women = true })
+						RadioButton(newMatchScreenState.women, { newMatchScreenState.women = true })
 						Text("Féminin")
 					}
 				}
 				Box(defaultModifier){
-					OutlinedTextField(level, {}, Modifier.fillMaxWidth(), label = { Text("Niveau") }, trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, isError = levelError)
-					DropdownMenu(openLevel, { openLevel = false }, Modifier.fillMaxWidth(0.6f)){
-						DropdownMenuItem({ Text("U17")}, { level = "U17"; openLevel = false })
-						DropdownMenuItem({ Text("U18")}, { level = "U18"; openLevel = false })
-						DropdownMenuItem({ Text("U20")}, { level = "U20"; openLevel = false })
-						DropdownMenuItem({ Text("Senior")}, { level = "Senior"; openLevel = false })
+					OutlinedTextField(newMatchScreenState.level, {}, Modifier.fillMaxWidth(), label = { Text("Niveau") }, trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }, isError = newMatchScreenState.levelError)
+					DropdownMenu(newMatchScreenState.openLevel, { newMatchScreenState.openLevel = false }, Modifier.fillMaxWidth(0.6f)){
+						DropdownMenuItem({ Text("U17")}, { newMatchScreenState.level = "U17"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("U18")}, { newMatchScreenState.level = "U18"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("U20")}, { newMatchScreenState.level = "U20"; newMatchScreenState.openLevel = false })
+						DropdownMenuItem({ Text("Senior")}, { newMatchScreenState.level = "Senior"; newMatchScreenState.openLevel = false })
 					}
-					Spacer(Modifier.matchParentSize().clickable { openLevel = true })
+					Spacer(Modifier.matchParentSize().clickable { newMatchScreenState.openLevel = true })
 				}
 			}
 			Button(
 				{
 					var ok = true
-					if(local == ""){
+					if(newMatchScreenState.local == ""){
 						ok = false
-						localError = true
+						newMatchScreenState.localError = true
 					}else{
-						localError = false
+						newMatchScreenState.localError = false
 					}
-					if(visitor == ""){
+					if(newMatchScreenState.visitor == ""){
 						ok = false
-						visitorError = true
+						newMatchScreenState.visitorError = true
 					}else{
-						visitorError = false
+						newMatchScreenState.visitorError = false
 					}
-					if(level == ""){
+					if(newMatchScreenState.level == ""){
 						ok = false
-						levelError = true
+						newMatchScreenState.levelError = true
 					}else{
-						levelError = false
+						newMatchScreenState.levelError = false
 					}
 					if(ok){
-						state.local.reset()
-						state.visitor.reset()
-						state.local.name = local
-						state.visitor.name = visitor
-						state.level = level
-						state.gender = if(women) "F" else "M"
-						state.done = false
+						val info = Info(newMatchScreenState.local, newMatchScreenState.visitor, newMatchScreenState.level, if(newMatchScreenState.women) Gender.Women else Gender.Men)
 						GlobalScope.launch{
-							initSummary(state, db)
-							state.infoId = db.infoDao().insertInfo(Info(local, visitor, level, if(women) "F" else "H"))
+							val id = db.infoDao().insertInfo(info)
+							withContext(Dispatchers.Main){
+								navController.navigate("match/$id"){ popUpTo("home") }
+							}
 						}
-						navController.navigate("match"){ popUpTo("home") }
 					}
 				},
 				defaultModifier
@@ -139,28 +137,5 @@ fun NewMatchScreen(navController: NavController, state: AppState, db: AppDatabas
 				Text("Créer le match")
 			}
 		}
-	}
-}
-
-suspend fun initSummary(state: AppState, db: AppDatabase){
-	val key = listOf("1", "2", "3", "L")
-	val summaries = mutableListOf<Summary>()
-	with(state.local.name){
-		key.forEach { k ->
-			for( quart in 1..4){
-				summaries.add(Summary(this@with, k, quart, 0))
-			}
-		}
-	}
-	with(state.visitor.name){
-		key.forEach { k ->
-			for( quart in 1..4){
-				summaries.add(Summary(this@with, k, quart, 0))
-			}
-		}
-	}
-	withContext(Dispatchers.IO){
-		db.summaryDao().wipeTable()
-		db.summaryDao().insertSummary(summaries)
 	}
 }

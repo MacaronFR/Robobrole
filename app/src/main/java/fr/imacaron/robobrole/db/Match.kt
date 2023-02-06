@@ -1,6 +1,7 @@
 package fr.imacaron.robobrole.db
 
 import androidx.room.*
+import fr.imacaron.robobrole.types.GenderConverter
 
 enum class Type(val value: String){
 	Point("point"),
@@ -11,7 +12,7 @@ enum class Type(val value: String){
 
 @Entity(tableName = "current")
 data class MatchEvent(
-	@PrimaryKey(true) val uid: Long,
+	@PrimaryKey(true) var uid: Long,
 	@ColumnInfo(name = "type") val type: Type,
 	@ColumnInfo(name = "team") val team: String,
 	@ColumnInfo(name = "data") val data: String,
@@ -52,10 +53,13 @@ interface MatchEventDAO {
 
 	@Query("DELETE FROM current")
 	fun wipeTable()
+
+	@Query("SELECT * FROM current WHERE team = :team AND quart = :quart AND type = :type AND data = :data ORDER BY time DESC")
+	fun getSpecificEventDesc(team: String, quart: Int, type: Type, data: String): List<MatchEvent>
 }
 
 @Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 6)
-@TypeConverters(Converters::class, LocalDateConverters::class)
+@TypeConverters(Converters::class, LocalDateConverters::class, GenderConverter::class)
 abstract class AppDatabase: RoomDatabase(){
 	abstract fun matchDao(): MatchEventDAO
 

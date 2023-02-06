@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.room.Room
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.components.AppBar
@@ -20,7 +22,8 @@ import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.match.StatScreen
-import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.MatchState
+import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.UIState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 import kotlinx.coroutines.Dispatchers
@@ -44,36 +47,37 @@ class MainActivity : ComponentActivity() {
 			AppDatabase::class.java, "match"
 		).fallbackToDestructiveMigration().build()
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
-		val appState = AppState(sharedPref, db)
+		val matchState = MatchState()
+		val prefState = PrefState(sharedPref)
 		val uiState = UIState()
 		setContent {
 			val navController = rememberNavController()
-			RobobroleTheme(darkTheme = appState.theme) {
+			RobobroleTheme(darkTheme = prefState.theme) {
 				Scaffold(
-					topBar = { AppBar(appState, db, navController, uiState) },
+					topBar = { AppBar(prefState, db, navController, uiState, matchState) },
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("home"){ HomeScreen(navController, db, appState, uiState) }
-						composable("new_match"){ NewMatchScreen(navController, appState, db, uiState) }
-						composable("match"){ MatchScreen(appState, db, navController, uiState) }
-						composable("stat"){ StatScreen(appState, db) }
+						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
+						composable("new_match"){ NewMatchScreen(navController, db, uiState) }
+						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, navController, uiState, entries.arguments!!.getLong("current"), prefState.left) }
+						composable("stat"){ StatScreen(matchState) }
 					}
 				}
 			}
 		}
 	}
 
-	suspend fun save(state: AppState) {
+	suspend fun save(state: MatchState) {
 		state.done = true
-		db.infoDao().setDone(state.infoId)
-		saveHistory(state.infoId, getCsv())
+		db.infoDao().setDone(state.current)
+		saveHistory(state.current, getCsv())
 	}
 
-	suspend fun export(id: Long, state: AppState){
-		val f = openFileInput(id.toString())
+	suspend fun export(matchState: MatchState){
+		val f = openFileInput(matchState.current.toString())
 		val data = f.readAllBytes().toString(Charset.defaultCharset())
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-		val initName = "${state.local.name}-${state.visitor.name}-${state.level}-${state.gender}-${state.date.dayOfMonth}-${state.date.monthValue}-${state.date.year}"
+		val initName = "${matchState.local}-${matchState.visitor}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
 		var name = "$initName.csv"
 		var index = 0
 		val fileNames = dir.listFiles()?.map { it.name } ?: listOf()

@@ -10,12 +10,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
-import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.MatchState
+import fr.imacaron.robobrole.types.total
 import kotlin.math.max
 
 @Composable
-fun StatScreen(state: AppState, db: AppDatabase){
+fun StatScreen(state: MatchState){
 	Card(Modifier.fillMaxWidth().padding(8.dp)) {
 		Canvas(
 			Modifier.fillMaxSize(),
@@ -26,13 +26,13 @@ fun StatScreen(state: AppState, db: AppDatabase){
 			val visitorData = mutableListOf<Offset>()
 			var vtmp = 0
 			var ltmp = 0
-			val maxTotal = max(state.local.total(), state.visitor.total())
-			state.local.scores.forEachIndexed { index, points ->
-				ltmp += points.tot()
+			val maxTotal = max(state.localSummary.total(), state.visitorSummary.total())
+			state.localSummary.forEachIndexed { index, points ->
+				ltmp += points.total()
 				localData.add(Offset(100f + index * (w-100) / 4, h-(ltmp * (h - 100) / maxTotal)))
 			}
-			state.visitor.scores.forEachIndexed { index, points ->
-				vtmp += points.tot()
+			state.visitorSummary.forEachIndexed { index, points ->
+				vtmp += points.total()
 				visitorData.add(Offset(100f + index * (w-100) / 4, h-(vtmp * (h - 100) / maxTotal)))
 			}
 			drawPoints(localData, PointMode.Polygon, Color.Red, strokeWidth = 12f, cap = StrokeCap.Round)

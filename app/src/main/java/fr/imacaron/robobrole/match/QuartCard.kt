@@ -5,10 +5,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.components.ButtonLong
-import fr.imacaron.robobrole.types.Team
+import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.db.Type
+import fr.imacaron.robobrole.types.Gender
+import fr.imacaron.robobrole.types.MatchState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun TeamText(name: String, left: Boolean, index: Int, score: Int){
@@ -39,43 +48,66 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, enabled: Boolean, 
 	}
 }
 
+fun pointOnClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
+	val summary = matchState.getSummary(team, quart)
+	when(data){
+		"1" -> summary.one++
+		"2" -> summary.two++
+		"3" -> summary.three++
+		"L" -> summary.player++
+	}
+	val e = MatchEvent(Type.Point, team, data, (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+	GlobalScope.launch(Dispatchers.IO){
+		e.uid = db.matchDao().insertEvent(e)
+		matchState.events.add(e)
+	}
+}
+
+fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
+	GlobalScope.launch(Dispatchers.IO) {
+		val events = db.matchDao().getSpecificEventDesc(team, quart, Type.Point, data)
+		if(events.isNotEmpty()){
+			val summary = matchState.getSummary(team, quart)
+			when(data){
+				"1" -> summary.one--
+				"2" -> summary.two--
+				"3" -> summary.three--
+				"L" -> summary.player--
+			}
+			matchState.events.removeIf{ it.uid == events[0].uid }
+			db.matchDao().deleteEvent(events[0].uid)
+		}
+	}
+}
+
 @Composable
-fun QuartCard(modifier: Modifier, team: Team, index: Int, women: Boolean, left: Boolean, done: Boolean){
+fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean){
 	val conf = LocalConfiguration.current
+	val db = (LocalContext.current as MainActivity).db
+	println(quart)
+	val summary = matchState.getSummary(team, quart)
 	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 0.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(
-					{
-						team.scores[index].apply {
-							when(it){
-								"1" -> one++
-								"2" -> two++
-								"3" -> three++
-								"L" -> lucille++
-							}
-						}
-					},
-					{
-						if(team.scores[index][it] > 0){
-							team.scores[index].apply {
-								when(it){
-									"1" -> one--
-									"2" -> two--
-									"3" -> three--
-									"L" -> lucille--
-								}
-							}
-						}
-					},
-					team.matchStart != 0L && !done,
-					women,
+					pointOnClick(matchState, team, quart, it, db),
+					pointOnLongClick(matchState, team, quart, it, db),
+					matchState.startAt != 0L && !matchState.done,
+					matchState.gender == Gender.Women,
 					it
 				){
-					LabelText("${team.scores[index][it].value}")
+					val v = when(it){
+						"1" -> summary.one
+						"2" -> summary.two
+						"3" -> summary.three
+						"L" -> summary.player
+						else -> throw IllegalArgumentException()
+					}
+					println(quart)
+					LabelText("$v")
 				}
 			}
 		}
-		TeamText(team.name, left, index + 1, team.scores[index].tot())
+		TeamText(team, left, quart, summary.total())
 	}
 }

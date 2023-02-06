@@ -20,7 +20,8 @@ import androidx.navigation.NavController
 import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.types.AppState
+import fr.imacaron.robobrole.types.MatchState
+import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.Theme
 import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun AppBar(appState: AppState, db: AppDatabase, nav: NavController, uiState: UIState){
+fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: UIState, matchState: MatchState){
 	val activity = LocalContext.current as MainActivity
 	TopAppBar(
 		title = { Text("Robobrole") },
@@ -45,30 +46,30 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController, uiState: UIS
 		},
 		actions = {
 			IconButton(onClick = {
-				if(appState.theme == Theme.Dark){
-					appState.setLightTheme()
-				}else if(appState.theme == Theme.Light){
-					appState.setDarkTheme()
+				if(prefState.theme == Theme.Dark){
+					prefState.setLightTheme()
+				}else if(prefState.theme == Theme.Light){
+					prefState.setDarkTheme()
 				}
 			}) {
-				if(appState.theme == Theme.Default){
+				if(prefState.theme == Theme.Default){
 					if(isSystemInDarkTheme()){
-						appState.setDarkTheme(false)
+						prefState.setDarkTheme(false)
 					} else {
-						appState.setLightTheme(false)
+						prefState.setLightTheme(false)
 					}
 				}
-				if(appState.theme == Theme.Dark){
+				if(prefState.theme == Theme.Dark){
 					Icon(ImageVector.vectorResource(R.drawable.sun), null)
-				}else if(appState.theme == Theme.Light){
+				}else if(prefState.theme == Theme.Light){
 					Icon(ImageVector.vectorResource(R.drawable.moon), null)
 				}
 			}
-			if(appState.done && appState.infoId != 0L && !uiState.home){
+			if(uiState.export){
 				IconButton(
 					{
 						GlobalScope.launch(Dispatchers.IO) {
-							activity.export(appState.infoId, appState)
+							activity.export(matchState)
 						}
 					}
 				){
@@ -81,15 +82,15 @@ fun AppBar(appState: AppState, db: AppDatabase, nav: NavController, uiState: UIS
 				}
 				DropdownMenu(expanded = uiState.displayMenu, onDismissRequest = { uiState.closeMenu() }){
 					DropdownMenuItem(
-						text = { Text(if(appState.left) "Gaucher" else "Droitier") },
+						text = { Text(if(prefState.left) "Gaucher" else "Droitier") },
 						onClick = {
-							appState.toggleLeftHanded()
+							prefState.toggleLeftHanded()
 						},
-						leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.back_hand), null, Modifier.scale(if(appState.left) -1f else 1f, 1f)) }
+						leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.back_hand), null, Modifier.scale(if(prefState.left) -1f else 1f, 1f)) }
 					)
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },
-						onClick = { appState.setDefaultTheme() },
+						onClick = { prefState.setDefaultTheme() },
 						leadingIcon = { Icon(Icons.Outlined.Refresh, null) }
 					)
 					DropdownMenuItem(

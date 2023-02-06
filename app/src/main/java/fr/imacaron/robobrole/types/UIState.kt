@@ -11,6 +11,8 @@ class UIState {
 
 	var home: Boolean by mutableStateOf(false)
 
+	var export: Boolean by mutableStateOf(false)
+
 	var displayMenu: Boolean by mutableStateOf(false)
 		private set
 
