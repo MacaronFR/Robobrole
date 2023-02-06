@@ -123,10 +123,9 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TeamCards(matchState: MatchState, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>, left: Boolean){
-	Box(Modifier.padding(0.dp, 8.dp, 0.dp, 16.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
+	Box(Modifier.padding(0.dp, 8.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
 		for(i in matchState.localSummary.indices){
 			Column {
-				println(i)
 				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.local, i + 1, left)
 				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.visitor, i + 1, left)
 			}

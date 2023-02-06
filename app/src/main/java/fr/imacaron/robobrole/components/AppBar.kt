@@ -90,7 +90,10 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 					)
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },
-						onClick = { prefState.setDefaultTheme() },
+						onClick = {
+							prefState.setDefaultTheme()
+							prefState.setDefaultHand()
+						},
 						leadingIcon = { Icon(Icons.Outlined.Refresh, null) }
 					)
 					DropdownMenuItem(

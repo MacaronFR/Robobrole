@@ -15,6 +15,7 @@ import fr.imacaron.robobrole.db.MatchEvent
 import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.MatchState
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -48,6 +49,7 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, enabled: Boolean, 
 	}
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun pointOnClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
 	val summary = matchState.getSummary(team, quart)
 	when(data){
@@ -63,6 +65,7 @@ fun pointOnClick(matchState: MatchState, team: String, quart: Int, data: String,
 	}
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
 	GlobalScope.launch(Dispatchers.IO) {
 		val events = db.matchDao().getSpecificEventDesc(team, quart, Type.Point, data)
@@ -84,9 +87,8 @@ fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: Str
 fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean){
 	val conf = LocalConfiguration.current
 	val db = (LocalContext.current as MainActivity).db
-	println(quart)
 	val summary = matchState.getSummary(team, quart)
-	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(10.dp, 0.dp)) {
+	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(

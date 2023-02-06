@@ -49,4 +49,11 @@ class PrefState(val sharedPref: SharedPreferences) {
 			putBoolean("left", left)
 		}
 	}
+
+	fun setDefaultHand(){
+		left = false
+		sharedPref.edit {
+			putBoolean("left", false)
+		}
+	}
 }
