@@ -66,7 +66,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 	Column {
 		val swipeState = rememberSwipeableState(0)
 		Column(Modifier.padding(10.dp, 7.dp).fillMaxWidth().weight(1f)){
-			Card(Modifier.padding(0.dp, 8.dp)) {
+			OutlinedCard(Modifier.padding(0.dp, 8.dp)) {
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround){
 					ElevatedButton(
 						{
@@ -92,7 +92,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 					}
 				}
 			}
-			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
+			OutlinedCard(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
 				Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
 					TeamInfo(matchState.local, matchState.localSummary, swipeState.targetValue)
 					Column(Modifier.weight(0.10f)) {
@@ -101,7 +101,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 					TeamInfo(matchState.visitor, matchState.visitorSummary, swipeState.targetValue)
 				}
 			}
-			Card(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
+			OutlinedCard(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
 				Button({ nav.navigate("stat") }, Modifier.padding(8.dp)){
 					Text("Statistique")
 				}

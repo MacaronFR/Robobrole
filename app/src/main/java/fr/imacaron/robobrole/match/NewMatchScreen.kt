@@ -53,7 +53,7 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 	val keyboard = LocalSoftwareKeyboardController.current
 	uiState.home = false
 	Column {
-		Card(defaultModifier) {
+		OutlinedCard(defaultModifier) {
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 			Column(horizontalAlignment = Alignment.CenterHorizontally){
 				OutlinedTextField(

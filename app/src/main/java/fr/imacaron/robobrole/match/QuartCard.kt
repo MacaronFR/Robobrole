@@ -88,7 +88,7 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 	val conf = LocalConfiguration.current
 	val db = (LocalContext.current as MainActivity).db
 	val summary = matchState.getSummary(team, quart)
-	Card(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
+	OutlinedCard(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(

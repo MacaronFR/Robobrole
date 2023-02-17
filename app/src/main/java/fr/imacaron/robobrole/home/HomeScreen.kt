@@ -33,9 +33,9 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 		}
 	}
 	Column {
-		Card(Modifier.fillMaxWidth().padding(8.dp)) {
+		OutlinedCard(Modifier.fillMaxWidth().padding(8.dp)) {
 			Row(Modifier.padding(8.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-				Button(
+				FilledTonalButton(
 					{
 						matchState.clean()
 						navController.navigate("match/${current}")
@@ -69,7 +69,7 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 				}
 			}
 		}
-		Card(Modifier.padding(8.dp).fillMaxWidth()) {
+		OutlinedCard(Modifier.padding(8.dp).fillMaxWidth()) {
 			Text("Historique :", Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
 			LazyColumn {
 				items(history.size){index ->
