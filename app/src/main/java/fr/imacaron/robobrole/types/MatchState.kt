@@ -63,6 +63,12 @@ class MatchState {
 						else -> throw IllegalArgumentException()
 					}
 				}
+				Type.Fault -> {
+
+				}
+				Type.Change -> {
+
+				}
 				else -> TODO("Not yet implemented")
 			}
 			this.events.add(e)

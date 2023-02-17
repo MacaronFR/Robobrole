@@ -83,12 +83,54 @@ fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: Str
 	}
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean){
 	val conf = LocalConfiguration.current
 	val db = (LocalContext.current as MainActivity).db
 	val summary = matchState.getSummary(team, quart)
 	OutlinedCard(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
+		Row(Modifier.fillMaxWidth().padding(0.dp, 8.dp), horizontalArrangement = Arrangement.SpaceAround){
+			ButtonLong(
+				{
+					val e = MatchEvent(Type.Change, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+					GlobalScope.launch(Dispatchers.IO) {
+						e.uid = db.matchDao().insertEvent(e)
+						matchState.events.add(e)
+					}
+				},
+				{
+					val events = db.matchDao().getChangeDesc(team, quart)
+					if(events.isNotEmpty()){
+						matchState.events.removeIf { it.uid == events[0].uid }
+						db.matchDao().deleteEvent(events[0].uid)
+					}
+				},
+				enabled = matchState.startAt != 0L && !matchState.done
+			){
+				Text("Changement")
+			}
+			ButtonLong(
+				{
+					val e = MatchEvent(Type.Fault, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+					GlobalScope.launch(Dispatchers.IO) {
+						e.uid = db.matchDao().insertEvent(e)
+						matchState.events.add(e)
+					}
+				},
+				{
+					val events = db.matchDao().getFaultDesc(team, quart)
+					if(events.isNotEmpty()){
+						matchState.events.removeIf { it.uid == events[0].uid }
+						db.matchDao().deleteEvent(events[0].uid)
+					}
+				},
+				Modifier,
+				matchState.startAt != 0L && !matchState.done
+			){
+				Text("Faute")
+			}
+		}
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(
@@ -105,7 +147,6 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 						"L" -> summary.player
 						else -> throw IllegalArgumentException()
 					}
-					println(quart)
 					LabelText("$v")
 				}
 			}

@@ -56,6 +56,12 @@ interface MatchEventDAO {
 
 	@Query("SELECT * FROM current WHERE team = :team AND quart = :quart AND type = :type AND data = :data ORDER BY time DESC")
 	fun getSpecificEventDesc(team: String, quart: Int, type: Type, data: String): List<MatchEvent>
+
+	@Query("SELECT * FROM current WHERE team = :team AND quart = :quart AND type = 'change' ORDER BY time DESC")
+	fun getChangeDesc(team: String, quart: Int): List<MatchEvent>
+
+	@Query("SELECT * FROM current WHERE team = :team AND quart = :quart AND type = 'fault' ORDER BY time DESC")
+	fun getFaultDesc(team: String, quart: Int): List<MatchEvent>
 }
 
 @Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 6)
