@@ -93,25 +93,6 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 		Row(Modifier.fillMaxWidth().padding(0.dp, 8.dp), horizontalArrangement = Arrangement.SpaceAround){
 			ButtonLong(
 				{
-					val e = MatchEvent(Type.Change, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
-					GlobalScope.launch(Dispatchers.IO) {
-						e.uid = db.matchDao().insertEvent(e)
-						matchState.events.add(e)
-					}
-				},
-				{
-					val events = db.matchDao().getChangeDesc(team, quart)
-					if(events.isNotEmpty()){
-						matchState.events.removeIf { it.uid == events[0].uid }
-						db.matchDao().deleteEvent(events[0].uid)
-					}
-				},
-				enabled = matchState.startAt != 0L && !matchState.done
-			){
-				Text("Changement")
-			}
-			ButtonLong(
-				{
 					val e = MatchEvent(Type.Fault, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
 					GlobalScope.launch(Dispatchers.IO) {
 						e.uid = db.matchDao().insertEvent(e)
@@ -129,6 +110,25 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 				matchState.startAt != 0L && !matchState.done
 			){
 				Text("Faute")
+			}
+			ButtonLong(
+				{
+					val e = MatchEvent(Type.Change, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+					GlobalScope.launch(Dispatchers.IO) {
+						e.uid = db.matchDao().insertEvent(e)
+						matchState.events.add(e)
+					}
+				},
+				{
+					val events = db.matchDao().getChangeDesc(team, quart)
+					if(events.isNotEmpty()){
+						matchState.events.removeIf { it.uid == events[0].uid }
+						db.matchDao().deleteEvent(events[0].uid)
+					}
+				},
+				enabled = matchState.startAt != 0L && !matchState.done
+			){
+				Text("Changement")
 			}
 		}
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
