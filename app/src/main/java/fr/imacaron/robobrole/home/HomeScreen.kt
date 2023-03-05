@@ -26,6 +26,7 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 	var current: Long by remember { mutableStateOf(-1) }
 	uiState.home = true
 	uiState.export = false
+	uiState.resetTitle()
 	LaunchedEffect(uiState.alert){
 		withContext(Dispatchers.IO){
 			history = db.infoDao().getSaved()

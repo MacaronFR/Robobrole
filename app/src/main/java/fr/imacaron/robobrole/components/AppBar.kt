@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: UIState, matchState: MatchState){
 	val activity = LocalContext.current as MainActivity
 	TopAppBar(
-		title = { Text("Robobrole") },
+		title = { Text(uiState.title) },
 		navigationIcon = {
 			if(!uiState.home){
 				IconButton({

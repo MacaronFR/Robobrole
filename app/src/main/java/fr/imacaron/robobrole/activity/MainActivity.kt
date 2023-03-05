@@ -55,14 +55,14 @@ class MainActivity : ComponentActivity() {
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = prefState.theme) {
 				Scaffold(
-					topBar = { AppBar(prefState, db, navController, uiState, matchState) },
+					topBar = { AppBar(prefState, db, navController, uiState, matchState) }
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
 						composable("new_match"){ NewMatchScreen(navController, db, uiState) }
 						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, navController, uiState, entries.arguments!!.getLong("current"), prefState.left) }
 						composable("stat"){ StatScreen(matchState) }
-						composable("team"){ TeamScreen(db, uiState) }
+						composable("team"){ TeamScreen(db, uiState, prefState) }
 					}
 				}
 			}

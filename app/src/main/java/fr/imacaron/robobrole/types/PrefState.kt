@@ -16,6 +16,17 @@ class PrefState(val sharedPref: SharedPreferences) {
 	var left: Boolean by mutableStateOf(sharedPref.getBoolean("left", false))
 		private set
 
+	private var teamName: String by mutableStateOf(sharedPref.getString("team", "")!!)
+
+	var team: String
+		get() = teamName
+		set(value) {
+			teamName = value
+			sharedPref.edit {
+				putString("team", value)
+			}
+		}
+
 	fun setLightTheme(setPref: Boolean = true){
 		theme = Theme.Light
 		if(setPref){

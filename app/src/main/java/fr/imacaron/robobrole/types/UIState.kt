@@ -16,6 +16,12 @@ class UIState {
 	var displayMenu: Boolean by mutableStateOf(false)
 		private set
 
+	var title: String by mutableStateOf("Robobrole")
+
+	fun resetTitle(){
+		title = "Robobrole"
+	}
+
 	fun toggleMenu(){
 		displayMenu = !displayMenu
 	}
