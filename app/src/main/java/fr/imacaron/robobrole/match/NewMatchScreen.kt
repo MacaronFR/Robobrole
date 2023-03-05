@@ -25,18 +25,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.Info
+import fr.imacaron.robobrole.db.Match
 import fr.imacaron.robobrole.types.Gender
+import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
-class NewMatchScreenState{
+class NewMatchScreenState(local: String){
 	var openLevel: Boolean by mutableStateOf(false)
 	var level: String by mutableStateOf("Senior")
 	var levelError: Boolean by mutableStateOf(false)
-	var local: String by mutableStateOf("Bois le roi")
+	var local: String by mutableStateOf(local)
 	var localError: Boolean by mutableStateOf(false)
 	var visitor: String by mutableStateOf("")
 	var visitorError: Boolean by mutableStateOf(false)
@@ -46,12 +47,13 @@ class NewMatchScreenState{
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UIState){
-	val newMatchScreenState = NewMatchScreenState()
+fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UIState, prefState: PrefState){
+	val newMatchScreenState = NewMatchScreenState(prefState.team)
 	val rotate by animateFloatAsState(if (newMatchScreenState.switch) 270f else 90f)
 	val focus = LocalFocusManager.current
 	val keyboard = LocalSoftwareKeyboardController.current
 	uiState.home = false
+	uiState.title = "Nouveau match"
 	Column {
 		OutlinedCard(defaultModifier) {
 			Text("Information du match", defaultModifier, textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
@@ -127,9 +129,9 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 						newMatchScreenState.levelError = false
 					}
 					if(ok){
-						val info = Info(newMatchScreenState.local, newMatchScreenState.visitor, newMatchScreenState.level, if(newMatchScreenState.women) Gender.Women else Gender.Men)
+						val info = Match(newMatchScreenState.local, newMatchScreenState.visitor, newMatchScreenState.level, if(newMatchScreenState.women) Gender.Women else Gender.Men)
 						GlobalScope.launch{
-							val id = db.infoDao().insertInfo(info)
+							val id = db.matchDao().insertInfo(info)
 							withContext(Dispatchers.Main){
 								navController.navigate("match/$id"){ popUpTo("home") }
 							}

@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.MatchEvent
 import fr.imacaron.robobrole.types.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -44,23 +43,12 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 	}
 	val activity = LocalContext.current as MainActivity
 	uiState.home = false
+	uiState.title = "Match"
 	LaunchedEffect(uiState.home){
-		println("Coroutine")
 		GlobalScope.launch(Dispatchers.IO) {
-			matchState.loadFromInfo(db.infoDao().get(current))
-			val events = if(matchState.done){
-				val data = activity.loadFile(matchState.current).lines().toMutableList()
-				data.removeFirst()
-				data.removeIf { it.isEmpty() }
-				data.map {
-					MatchEvent(it)
-				}
-			}else{
-				db.matchDao().getAll()
-			}
-			matchState.loadEvents(events)
+			matchState.loadFromMatch(db.matchDao().get(current))
+			matchState.loadEvents(db.eventDAO().getByMatch(matchState.current))
 			uiState.export = matchState.done
-			println(matchState.done)
 		}
 	}
 	Column {
@@ -73,7 +61,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 							val matchStart = System.currentTimeMillis() / 1000
 							matchState.startAt = matchStart
 							GlobalScope.launch(Dispatchers.IO){
-								db.infoDao().setStart(matchStart, matchState.current)
+								db.matchDao().setStart(matchStart, matchState.current)
 							}
 						},
 						enabled = matchState.startAt == 0L && !matchState.done
@@ -83,6 +71,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 							matchState.done = true
 							uiState.export = true
 							GlobalScope.launch(Dispatchers.IO){
+								db.matchDao().setDone(matchState.current)
 								activity.save(matchState)
 							}
 						},
@@ -126,8 +115,8 @@ fun TeamCards(matchState: MatchState, size: Dp, sizePx: Float, swipeState: Swipe
 	Box(Modifier.padding(0.dp, 8.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
 		for(i in matchState.localSummary.indices){
 			Column {
-				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.local, i + 1, left)
-				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.visitor, i + 1, left)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.local, i + 1, left, matchState.current)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.visitor, i + 1, left, matchState.current)
 			}
 		}
 	}

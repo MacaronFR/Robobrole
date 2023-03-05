@@ -22,7 +22,7 @@ import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.match.StatScreen
-import fr.imacaron.robobrole.match.TeamScreen
+import fr.imacaron.robobrole.home.TeamScreen
 import fr.imacaron.robobrole.types.MatchState
 import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.UIState
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
-						composable("new_match"){ NewMatchScreen(navController, db, uiState) }
+						composable("new_match"){ NewMatchScreen(navController, db, uiState, prefState) }
 						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, navController, uiState, entries.arguments!!.getLong("current"), prefState.left) }
 						composable("stat"){ StatScreen(matchState) }
 						composable("team"){ TeamScreen(db, uiState, prefState) }
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
 	suspend fun save(state: MatchState) {
 		state.done = true
-		db.infoDao().setDone(state.current)
+		db.matchDao().setDone(state.current)
 		saveHistory(state.current, getCsv())
 	}
 
@@ -125,16 +125,11 @@ class MainActivity : ComponentActivity() {
 	private fun getCsv(): String {
 		val res = StringBuilder()
 		res.appendLine("Type;Équipe;Data;Time;Quart")
-		val events = db.matchDao().getAll()
+		val events = db.eventDAO().getAll()
 		events.forEach { e ->
 			res.appendLine("${e.type};${e.team};${e.data};${e.time};${e.quart}")
 		}
 		return res.toString()
-	}
-
-	suspend fun loadFile(id: Long): String{
-		val f = openFileInput(id.toString())
-		return f.readAllBytes().toString(Charset.defaultCharset())
 	}
 
 	suspend fun removeAllSave(){

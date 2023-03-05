@@ -119,9 +119,8 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 						{
 							Button({
 								GlobalScope.launch(Dispatchers.IO) {
-									db.infoDao().removeAll()
-									db.summaryDao().wipeTable()
-									db.matchDao().wipeTable()
+									db.matchDao().removeAll()
+									db.eventDAO().wipeTable()
 									db.playerDao().wipeTable()
 									activity.removeAllSave()
 									uiState.alert = false

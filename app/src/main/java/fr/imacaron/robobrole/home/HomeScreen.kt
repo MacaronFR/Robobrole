@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.Info
+import fr.imacaron.robobrole.db.Match
 import fr.imacaron.robobrole.types.MatchState
 import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
@@ -22,15 +22,15 @@ import kotlinx.coroutines.*
 fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState, matchState: MatchState){
 	val context = LocalContext.current as MainActivity
 	var confirm: Boolean by remember { mutableStateOf(false) }
-	var history: List<Info> by remember { mutableStateOf(listOf()) }
+	var history: List<Match> by remember { mutableStateOf(listOf()) }
 	var current: Long by remember { mutableStateOf(-1) }
 	uiState.home = true
 	uiState.export = false
 	uiState.resetTitle()
 	LaunchedEffect(uiState.alert){
 		withContext(Dispatchers.IO){
-			history = db.infoDao().getSaved()
-			current = db.infoDao().getCurrent()?.uid ?: -1
+			history = db.matchDao().getSaved()
+			current = db.matchDao().getCurrent()?.uid ?: -1
 		}
 	}
 	Column {
@@ -47,9 +47,9 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 				}
 				Button({
 					GlobalScope.launch(Dispatchers.IO){
-						if(confirm || db.infoDao().getCurrent() == null){
-							db.matchDao().wipeTable()
-							db.infoDao().deleteCurrent()
+						if(confirm || db.matchDao().getCurrent() == null){
+							db.eventDAO().wipeTable()
+							db.matchDao().deleteCurrent()
 							matchState.clean()
 							withContext(Dispatchers.Main){
 								navController.navigate("new_match")

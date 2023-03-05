@@ -4,8 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import fr.imacaron.robobrole.db.Info
-import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.db.Match
+import fr.imacaron.robobrole.db.Event
 import fr.imacaron.robobrole.db.Type
 import java.time.LocalDate
 
@@ -28,30 +28,29 @@ class MatchState {
 
 	var done: Boolean by mutableStateOf(false)
 
-	val events: MutableList<MatchEvent> = mutableListOf()
+	val events: MutableList<Event> = mutableListOf()
 
 	val localSummary = List(4) { Summary() }
 
 	val visitorSummary = List(4) { Summary() }
 	
-	fun loadFromInfo(info: Info){
-		current = info.uid
-		gender = info.gender
-		startAt = info.matchStart
-		level = info.level
-		local = info.local
-		visitor = info.visitor
-		done = info.done
-		date = info.date
+	fun loadFromMatch(match: Match){
+		current = match.uid
+		gender = match.gender
+		startAt = match.matchStart
+		level = match.level
+		local = match.local
+		visitor = match.visitor
+		done = match.done
+		date = match.date
 	}
 
-	fun loadEvents(events: List<MatchEvent>){
-		println(events)
+	fun loadEvents(events: List<Event>){
 		events.sortedBy { it.time }.forEach {e ->
 			val summary = when(e.team){
 				local -> localSummary
 				visitor -> visitorSummary
-				else -> throw IllegalArgumentException()
+				else -> { throw IllegalArgumentException() }
 			}
 			when(e.type) {
 				Type.Point -> {
@@ -59,7 +58,6 @@ class MatchState {
 						"1" -> { summary[e.quart - 1].one++ }
 						"2" -> { summary[e.quart - 1].two++ }
 						"3" -> { summary[e.quart - 1].three++ }
-						"L" -> { summary[e.quart - 1].player++ }
 						else -> throw IllegalArgumentException()
 					}
 				}

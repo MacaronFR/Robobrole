@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.MatchEvent
+import fr.imacaron.robobrole.db.Event
 import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.MatchState
@@ -50,17 +50,16 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, enabled: Boolean, 
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun pointOnClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
+fun pointOnClick(matchState: MatchState, team: String, player: String, match: Long, quart: Int, data: String, db: AppDatabase): () -> Unit = {
 	val summary = matchState.getSummary(team, quart)
 	when(data){
 		"1" -> summary.one++
 		"2" -> summary.two++
 		"3" -> summary.three++
-		"L" -> summary.player++
 	}
-	val e = MatchEvent(Type.Point, team, data, (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+	val e = Event(Type.Point, team, player, data, (System.currentTimeMillis() / 1000) - matchState.startAt, quart, match)
 	GlobalScope.launch(Dispatchers.IO){
-		e.uid = db.matchDao().insertEvent(e)
+		e.uid = db.eventDAO().insertEvent(e)
 		matchState.events.add(e)
 	}
 }
@@ -68,24 +67,23 @@ fun pointOnClick(matchState: MatchState, team: String, quart: Int, data: String,
 @OptIn(DelicateCoroutinesApi::class)
 fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: String, db: AppDatabase): () -> Unit = {
 	GlobalScope.launch(Dispatchers.IO) {
-		val events = db.matchDao().getSpecificEventDesc(team, quart, Type.Point, data)
+		val events = db.eventDAO().getSpecificEventDesc(team, quart, Type.Point, data)
 		if(events.isNotEmpty()){
 			val summary = matchState.getSummary(team, quart)
 			when(data){
 				"1" -> summary.one--
 				"2" -> summary.two--
 				"3" -> summary.three--
-				"L" -> summary.player--
 			}
 			matchState.events.removeIf{ it.uid == events[0].uid }
-			db.matchDao().deleteEvent(events[0].uid)
+			db.eventDAO().deleteEvent(events[0].uid)
 		}
 	}
 }
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean){
+fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean, match: Long){
 	val conf = LocalConfiguration.current
 	val db = (LocalContext.current as MainActivity).db
 	val summary = matchState.getSummary(team, quart)
@@ -93,17 +91,17 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 		Row(Modifier.fillMaxWidth().padding(0.dp, 8.dp), horizontalArrangement = Arrangement.SpaceAround){
 			ButtonLong(
 				{
-					val e = MatchEvent(Type.Fault, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+					val e = Event(Type.Fault, team, "", "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart, match)
 					GlobalScope.launch(Dispatchers.IO) {
-						e.uid = db.matchDao().insertEvent(e)
+						e.uid = db.eventDAO().insertEvent(e)
 						matchState.events.add(e)
 					}
 				},
 				{
-					val events = db.matchDao().getFaultDesc(team, quart)
+					val events = db.eventDAO().getFaultDesc(team, quart)
 					if(events.isNotEmpty()){
 						matchState.events.removeIf { it.uid == events[0].uid }
-						db.matchDao().deleteEvent(events[0].uid)
+						db.eventDAO().deleteEvent(events[0].uid)
 					}
 				},
 				Modifier,
@@ -113,17 +111,17 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 			}
 			ButtonLong(
 				{
-					val e = MatchEvent(Type.Change, team, "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart)
+					val e = Event(Type.Change, team, "", "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart, match)
 					GlobalScope.launch(Dispatchers.IO) {
-						e.uid = db.matchDao().insertEvent(e)
+						e.uid = db.eventDAO().insertEvent(e)
 						matchState.events.add(e)
 					}
 				},
 				{
-					val events = db.matchDao().getChangeDesc(team, quart)
+					val events = db.eventDAO().getChangeDesc(team, quart)
 					if(events.isNotEmpty()){
 						matchState.events.removeIf { it.uid == events[0].uid }
-						db.matchDao().deleteEvent(events[0].uid)
+						db.eventDAO().deleteEvent(events[0].uid)
 					}
 				},
 				enabled = matchState.startAt != 0L && !matchState.done
@@ -134,7 +132,7 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3", "L").forEach {
 				PointButton(
-					pointOnClick(matchState, team, quart, it, db),
+					pointOnClick(matchState, team, "", match, quart, it, db),
 					pointOnLongClick(matchState, team, quart, it, db),
 					matchState.startAt != 0L && !matchState.done,
 					matchState.gender == Gender.Women,

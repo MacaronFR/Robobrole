@@ -1,4 +1,4 @@
-package fr.imacaron.robobrole.match
+package fr.imacaron.robobrole.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -59,7 +59,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 			singleLine = true
 		)
 		Spacer(Modifier.height(16.dp))
-		LazyColumn(Modifier.padding(vertical = 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+		LazyColumn(Modifier.fillMaxWidth().padding(vertical = 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 			items(players, { player: Player -> player.id }) { player ->
 				val dismissState = rememberDismissState(confirmStateChange = {
 					if( it == DismissValue.DismissedToStart){

@@ -5,8 +5,8 @@ import fr.imacaron.robobrole.types.Gender
 import java.time.LocalDate
 import java.util.*
 
-@Entity(tableName = "info")
-data class Info(
+@Entity(tableName = "match")
+data class Match(
 	@PrimaryKey(true) val uid: Long,
 	@ColumnInfo(name = "local") val local: String,
 	@ColumnInfo(name = "visitor") val visitor: String,
@@ -32,29 +32,29 @@ class LocalDateConverters {
 }
 
 @Dao
-interface InfoDAO {
+interface MatchDAO {
 
 	@Insert
-	fun insertInfo(info: Info): Long
+	fun insertInfo(match: Match): Long
 
-	@Query("UPDATE info SET done = true WHERE uid = :id")
+	@Query("UPDATE match SET done = true WHERE uid = :id")
 	fun setDone(id: Long)
 
-	@Query("UPDATE info SET match_start = :start WHERE uid = :id")
+	@Query("UPDATE match SET match_start = :start WHERE uid = :id")
 	fun setStart(start: Long, id: Long)
 
-	@Query("DELETE FROM info WHERE done = false")
+	@Query("DELETE FROM match WHERE done = false")
 	fun deleteCurrent()
 
-	@Query("SELECT * FROM info WHERE done = false")
-	fun getCurrent(): Info?
+	@Query("SELECT * FROM match WHERE done = false")
+	fun getCurrent(): Match?
 
-	@Query("SELECT * FROM info WHERE done = true ORDER by uid DESC")
-	fun getSaved(): List<Info>
+	@Query("SELECT * FROM match WHERE done = true ORDER by uid DESC")
+	fun getSaved(): List<Match>
 
-	@Query("DELETE FROM info")
+	@Query("DELETE FROM match")
 	fun removeAll()
 
-	@Query("SELECT * FROM info WHERE uid = :id")
-	fun get(id: Long): Info
+	@Query("SELECT * FROM match WHERE uid = :id")
+	fun get(id: Long): Match
 }
