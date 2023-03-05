@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -82,6 +83,14 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 				}
 				DropdownMenu(expanded = uiState.displayMenu, onDismissRequest = { uiState.closeMenu() }){
 					DropdownMenuItem(
+						text ={ Text("Mon équipe") },
+						onClick = {
+							nav.navigate("team")
+							uiState.toggleMenu()
+						},
+						leadingIcon = { Icon(Icons.Outlined.Person, null) }
+					)
+					DropdownMenuItem(
 						text = { Text(if(prefState.left) "Gaucher" else "Droitier") },
 						onClick = {
 							prefState.toggleLeftHanded()
@@ -113,6 +122,7 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 									db.infoDao().removeAll()
 									db.summaryDao().wipeTable()
 									db.matchDao().wipeTable()
+									db.playerDao().wipeTable()
 									activity.removeAllSave()
 									uiState.alert = false
 									uiState.closeMenu()

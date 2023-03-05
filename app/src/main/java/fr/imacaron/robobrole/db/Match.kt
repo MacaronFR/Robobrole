@@ -64,7 +64,7 @@ interface MatchEventDAO {
 	fun getFaultDesc(team: String, quart: Int): List<MatchEvent>
 }
 
-@Database(entities = [MatchEvent::class, Summary::class, Info::class], version = 6)
+@Database(entities = [MatchEvent::class, Summary::class, Info::class, Player::class], version = 7)
 @TypeConverters(Converters::class, LocalDateConverters::class, GenderConverter::class)
 abstract class AppDatabase: RoomDatabase(){
 	abstract fun matchDao(): MatchEventDAO
@@ -72,4 +72,6 @@ abstract class AppDatabase: RoomDatabase(){
 	abstract fun summaryDao(): SummaryDAO
 
 	abstract fun infoDao(): InfoDAO
+
+	abstract fun playerDao(): PlayerDao
 }

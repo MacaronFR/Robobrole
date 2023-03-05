@@ -22,6 +22,7 @@ import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.match.StatScreen
+import fr.imacaron.robobrole.match.TeamScreen
 import fr.imacaron.robobrole.types.MatchState
 import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.UIState
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
 						composable("new_match"){ NewMatchScreen(navController, db, uiState) }
 						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, navController, uiState, entries.arguments!!.getLong("current"), prefState.left) }
 						composable("stat"){ StatScreen(matchState) }
+						composable("team"){ TeamScreen(db, uiState) }
 					}
 				}
 			}
