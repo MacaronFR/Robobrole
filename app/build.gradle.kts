@@ -48,6 +48,10 @@ android {
 			excludes += "/META-INF/{AL2.0,LGPL2.1}"
 		}
 	}
+
+	kotlinOptions{
+		freeCompilerArgs += ("-Xjvm-default=all")
+	}
 }
 
 dependencies {
@@ -61,8 +65,9 @@ dependencies {
 	implementation("androidx.compose.material3:material3:1.0.1")
 	implementation("androidx.navigation:navigation-compose:2.5.3")
 	implementation("androidx.room:room-runtime:$room_version")
+	implementation("androidx.compose.ui:ui-util:1.3.3")
+	implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
 	annotationProcessor("androidx.room:room-compiler:$room_version")
-//	kapt("androidx.room:room-compiler:$room_version")
 	ksp("androidx.room:room-compiler:$room_version")
 	testImplementation("junit:junit:4.13.2")
 	androidTestImplementation("androidx.test.ext:junit:1.1.5")

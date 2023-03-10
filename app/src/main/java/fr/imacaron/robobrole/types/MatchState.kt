@@ -1,12 +1,7 @@
 package fr.imacaron.robobrole.types
 
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import fr.imacaron.robobrole.db.Match
-import fr.imacaron.robobrole.db.Event
-import fr.imacaron.robobrole.db.Type
+import androidx.compose.runtime.*
+import fr.imacaron.robobrole.db.*
 import java.time.LocalDate
 
 @Stable
@@ -22,25 +17,27 @@ class MatchState {
 
 	var level: String by mutableStateOf("")
 
-	var local: String by mutableStateOf("")
+	var myTeam: String by mutableStateOf("")
 
-	var visitor: String by mutableStateOf("")
+	var otherTeam: String by mutableStateOf("")
+
+	val players: MutableList<Player> = mutableStateListOf()
 
 	var done: Boolean by mutableStateOf(false)
 
-	val events: MutableList<Event> = mutableListOf()
+	val events: MutableList<Event> = mutableStateListOf()
 
-	val localSummary = List(4) { Summary() }
+	val myTeamSum = List(4) { Summary() }
 
-	val visitorSummary = List(4) { Summary() }
+	val otherTeamSum = List(4) { Summary() }
 	
 	fun loadFromMatch(match: Match){
 		current = match.uid
 		gender = match.gender
 		startAt = match.matchStart
 		level = match.level
-		local = match.local
-		visitor = match.visitor
+		myTeam = match.myTeam
+		otherTeam = match.otherTeam
 		done = match.done
 		date = match.date
 	}
@@ -48,8 +45,8 @@ class MatchState {
 	fun loadEvents(events: List<Event>){
 		events.sortedBy { it.time }.forEach {e ->
 			val summary = when(e.team){
-				local -> localSummary
-				visitor -> visitorSummary
+				myTeam -> myTeamSum
+				otherTeam -> otherTeamSum
 				else -> { throw IllegalArgumentException() }
 			}
 			when(e.type) {
@@ -73,9 +70,16 @@ class MatchState {
 		}
 	}
 
+	fun loadPlayers(db: AppDatabase){
+		if(!done){
+			players.addAll(db.matchPlayerDao().getAll().map { db.playerDao().get(it.player)!! })
+			println(players.size)
+		}
+	}
+
 	fun getSummary(team: String, quart: Int): Summary = when(team) {
-		local -> localSummary[quart - 1]
-		visitor -> visitorSummary[quart - 1]
+		myTeam -> myTeamSum[quart - 1]
+		otherTeam -> otherTeamSum[quart - 1]
 		else -> throw IllegalArgumentException()
 	}
 
@@ -85,10 +89,11 @@ class MatchState {
 		gender = Gender.Women
 		startAt = 0
 		level = "0"
-		local = ""
-		visitor = ""
+		myTeam = ""
+		otherTeam = ""
+		players.clear()
 		events.clear()
-		localSummary.clean()
-		visitorSummary.clean()
+		myTeamSum.clean()
+		otherTeamSum.clean()
 	}
 }

@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,6 +18,8 @@ import androidx.room.Room
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.components.AppBar
 import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.Event
+import fr.imacaron.robobrole.drawer.*
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.match.StatScreen
@@ -34,7 +35,6 @@ import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.lang.StringBuilder
-import java.nio.charset.Charset
 
 class MainActivity : ComponentActivity() {
 
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
 						composable("new_match"){ NewMatchScreen(navController, db, uiState, prefState) }
-						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, navController, uiState, entries.arguments!!.getLong("current"), prefState.left) }
+						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, uiState, entries.arguments!!.getLong("current"), prefState.left) }
 						composable("stat"){ StatScreen(matchState) }
 						composable("team"){ TeamScreen(db, uiState, prefState) }
 					}
@@ -72,14 +72,15 @@ class MainActivity : ComponentActivity() {
 	suspend fun save(state: MatchState) {
 		state.done = true
 		db.matchDao().setDone(state.current)
-		saveHistory(state.current, getCsv())
+		withContext(Dispatchers.Main){
+			Toast.makeText(baseContext, "Sauvegardé", Toast.LENGTH_SHORT).show()
+		}
 	}
 
 	suspend fun export(matchState: MatchState){
-		val f = openFileInput(matchState.current.toString())
-		val data = f.readAllBytes().toString(Charset.defaultCharset())
+		val data = getCsv(matchState.events, matchState.myTeam, matchState.otherTeam)
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-		val initName = "${matchState.local}-${matchState.visitor}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
+		val initName = "${matchState.myTeam}-${matchState.otherTeam}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
 		var name = "$initName.csv"
 		var index = 0
 		val fileNames = dir.listFiles()?.map { it.name } ?: listOf()
@@ -88,21 +89,6 @@ class MainActivity : ComponentActivity() {
 			name = "$initName$index.csv"
 		}
 		saveFile(dir, name, data)
-	}
-
-	private suspend fun saveHistory(id: Long, data: String){
-		val f = openFileOutput(id.toString(), 0)
-		try {
-			f.write(data.toByteArray())
-			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Sauvegardé", Toast.LENGTH_SHORT).show()
-			}
-		} catch (e: IOException) {
-			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Erreur lors de la sauvegarde", Toast.LENGTH_SHORT).show()
-			}
-			e.printStackTrace()
-		}
 	}
 
 	private suspend fun saveFile(dir: File, fileName: String, data: String) {
@@ -122,12 +108,14 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 
-	private fun getCsv(): String {
+	private fun getCsv(events: List<Event>, own: String, other: String): String {
 		val res = StringBuilder()
-		res.appendLine("Type;Équipe;Data;Time;Quart")
-		val events = db.eventDAO().getAll()
+		res.appendLine("Quart;Temps;$own;$other;Player")
 		events.forEach { e ->
-			res.appendLine("${e.type};${e.team};${e.data};${e.time};${e.quart}")
+			when(e.team){
+				own -> res.appendLine("${e.quart};${e.time};${e.data};0;${e.player}")
+				other -> res.appendLine("${e.quart};${e.time};0;${e.data};${e.player}")
+			}
 		}
 		return res.toString()
 	}

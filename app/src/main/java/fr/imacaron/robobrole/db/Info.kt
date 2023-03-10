@@ -8,8 +8,8 @@ import java.util.*
 @Entity(tableName = "match")
 data class Match(
 	@PrimaryKey(true) val uid: Long,
-	@ColumnInfo(name = "local") val local: String,
-	@ColumnInfo(name = "visitor") val visitor: String,
+	@ColumnInfo(name = "local") val myTeam: String,
+	@ColumnInfo(name = "visitor") val otherTeam: String,
 	@ColumnInfo(name = "level") val level: String,
 	@ColumnInfo(name = "gender") val gender: Gender,
 	@ColumnInfo(name = "match_start") val matchStart: Long,

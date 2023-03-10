@@ -23,7 +23,7 @@ interface PlayerDao {
 	fun getAll(): List<Player>
 
 	@Query("SELECT * FROM player WHERE id = :id")
-	fun get(id: Long): Player
+	fun get(id: Long): Player?
 
 	@Delete
 	fun delete(player: Player)

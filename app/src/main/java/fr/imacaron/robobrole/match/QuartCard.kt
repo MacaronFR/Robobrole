@@ -1,8 +1,11 @@
 package fr.imacaron.robobrole.match
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -12,13 +15,11 @@ import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Event
+import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.MatchState
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 @Composable
 fun TeamText(name: String, left: Boolean, index: Int, score: Int){
@@ -83,56 +84,18 @@ fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: Str
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: Int, left: Boolean, match: Long){
+fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quart: Int, left: Boolean){
 	val conf = LocalConfiguration.current
 	val db = (LocalContext.current as MainActivity).db
+	val team = if(ownTeam) matchState.myTeam else matchState.otherTeam
 	val summary = matchState.getSummary(team, quart)
+	var player: Boolean by remember { mutableStateOf(false) }
+	var point: String by remember { mutableStateOf("") }
 	OutlinedCard(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
-		Row(Modifier.fillMaxWidth().padding(0.dp, 8.dp), horizontalArrangement = Arrangement.SpaceAround){
-			ButtonLong(
-				{
-					val e = Event(Type.Fault, team, "", "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart, match)
-					GlobalScope.launch(Dispatchers.IO) {
-						e.uid = db.eventDAO().insertEvent(e)
-						matchState.events.add(e)
-					}
-				},
-				{
-					val events = db.eventDAO().getFaultDesc(team, quart)
-					if(events.isNotEmpty()){
-						matchState.events.removeIf { it.uid == events[0].uid }
-						db.eventDAO().deleteEvent(events[0].uid)
-					}
-				},
-				Modifier,
-				matchState.startAt != 0L && !matchState.done
-			){
-				Text("Faute")
-			}
-			ButtonLong(
-				{
-					val e = Event(Type.Change, team, "", "", (System.currentTimeMillis() / 1000) - matchState.startAt, quart, match)
-					GlobalScope.launch(Dispatchers.IO) {
-						e.uid = db.eventDAO().insertEvent(e)
-						matchState.events.add(e)
-					}
-				},
-				{
-					val events = db.eventDAO().getChangeDesc(team, quart)
-					if(events.isNotEmpty()){
-						matchState.events.removeIf { it.uid == events[0].uid }
-						db.eventDAO().deleteEvent(events[0].uid)
-					}
-				},
-				enabled = matchState.startAt != 0L && !matchState.done
-			){
-				Text("Changement")
-			}
-		}
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
-			listOf("1", "2", "3", "L").forEach {
+			listOf("1", "2", "3").forEach {
 				PointButton(
-					pointOnClick(matchState, team, "", match, quart, it, db),
+					if(ownTeam) { { player = true; point = it } } else pointOnClick(matchState, team, "", matchState.current, quart, it, db),
 					pointOnLongClick(matchState, team, quart, it, db),
 					matchState.startAt != 0L && !matchState.done,
 					matchState.gender == Gender.Women,
@@ -142,13 +105,33 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, team: String, quart: I
 						"1" -> summary.one
 						"2" -> summary.two
 						"3" -> summary.three
-						"L" -> summary.player
 						else -> throw IllegalArgumentException()
 					}
 					LabelText("$v")
 				}
 			}
+			PlayerSelector(matchState.players, player, { player = false }) { player -> pointOnClick(matchState, team, player, matchState.current, quart, point, db)() }
 		}
 		TeamText(team, left, quart, summary.total())
+	}
+}
+
+@Composable
+fun PlayerSelector(players: List<Player>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
+	if(display){
+		AlertDialog(close, {}, text = {
+			LazyColumn(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+				items(players){
+					Button(
+						{
+							onSelect(it.name)
+							close()
+						}
+					){
+						Text(it.name, style = MaterialTheme.typography.titleMedium)
+					}
+				}
+			}
+		})
 	}
 }

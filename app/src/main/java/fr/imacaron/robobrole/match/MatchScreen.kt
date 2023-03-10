@@ -22,32 +22,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiState: UIState, current: Long, left: Boolean){
+fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, current: Long, left: Boolean){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
-	for( i in matchState.localSummary.indices){
+	for( i in matchState.myTeamSum.indices){
 		anchors[i * -sizePx] = i
 	}
 	val activity = LocalContext.current as MainActivity
 	uiState.home = false
 	uiState.title = "Match"
 	LaunchedEffect(uiState.home){
-		GlobalScope.launch(Dispatchers.IO) {
+		withContext(Dispatchers.IO) {
 			matchState.loadFromMatch(db.matchDao().get(current))
 			matchState.loadEvents(db.eventDAO().getByMatch(matchState.current))
+			matchState.players.clear()
+			matchState.loadPlayers(db)
 			uiState.export = matchState.done
 		}
 	}
@@ -83,16 +81,11 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, nav: NavController, uiS
 			}
 			OutlinedCard(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
 				Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-					TeamInfo(matchState.local, matchState.localSummary, swipeState.targetValue)
+					TeamInfo(matchState.myTeam, matchState.myTeamSum, swipeState.targetValue)
 					Column(Modifier.weight(0.10f)) {
 						Text("Q${swipeState.targetValue+1}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 					}
-					TeamInfo(matchState.visitor, matchState.visitorSummary, swipeState.targetValue)
-				}
-			}
-			OutlinedCard(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
-				Button({ nav.navigate("stat") }, Modifier.padding(8.dp)){
-					Text("Statistique")
+					TeamInfo(matchState.otherTeam, matchState.otherTeamSum, swipeState.targetValue)
 				}
 			}
 		}
@@ -113,10 +106,10 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 @Composable
 fun TeamCards(matchState: MatchState, size: Dp, sizePx: Float, swipeState: SwipeableState<Int>, anchors: Map<Float, Int>, left: Boolean){
 	Box(Modifier.padding(0.dp, 8.dp).width(size).swipeable(state = swipeState, anchors = anchors, thresholds = { _, _ -> FractionalThreshold(0.3f) }, orientation = Orientation.Horizontal)) {
-		for(i in matchState.localSummary.indices){
+		for(i in matchState.myTeamSum.indices){
 			Column {
-				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.local, i + 1, left, matchState.current)
-				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, matchState.visitor, i + 1, left, matchState.current)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, true, i + 1, left)
+				QuartCard(Modifier.offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }, matchState, false, i + 1, left)
 			}
 		}
 	}

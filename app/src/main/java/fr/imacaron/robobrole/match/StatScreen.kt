@@ -26,12 +26,12 @@ fun StatScreen(state: MatchState){
 			val visitorData = mutableListOf<Offset>()
 			var vtmp = 0
 			var ltmp = 0
-			val maxTotal = max(state.localSummary.total(), state.visitorSummary.total())
-			state.localSummary.forEachIndexed { index, points ->
+			val maxTotal = max(state.myTeamSum.total(), state.otherTeamSum.total())
+			state.myTeamSum.forEachIndexed { index, points ->
 				ltmp += points.total()
 				localData.add(Offset(100f + index * (w-100) / 4, h-(ltmp * (h - 100) / maxTotal)))
 			}
-			state.visitorSummary.forEachIndexed { index, points ->
+			state.otherTeamSum.forEachIndexed { index, points ->
 				vtmp += points.total()
 				visitorData.add(Offset(100f + index * (w-100) / 4, h-(vtmp * (h - 100) / maxTotal)))
 			}

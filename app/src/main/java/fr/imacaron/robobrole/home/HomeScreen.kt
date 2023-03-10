@@ -48,8 +48,11 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 				Button({
 					GlobalScope.launch(Dispatchers.IO){
 						if(confirm || db.matchDao().getCurrent() == null){
-							db.eventDAO().wipeTable()
+							db.matchDao().getCurrent()?.let {
+								db.eventDAO().deleteMatch(it.uid)
+							}
 							db.matchDao().deleteCurrent()
+							db.matchPlayerDao().deleteAll()
 							matchState.clean()
 							withContext(Dispatchers.Main){
 								navController.navigate("new_match")
@@ -79,7 +82,7 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 					}
 					Row(Modifier.padding(8.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
 						Column {
-							Text("${history[index].local} - ${history[index].visitor} | ${history[index].level}${history[index].gender.value}", style = MaterialTheme.typography.titleMedium)
+							Text("${history[index].myTeam} - ${history[index].otherTeam} | ${history[index].level}${history[index].gender.value}", style = MaterialTheme.typography.titleMedium)
 							Text("${history[index].date.dayOfMonth}/${history[index].date.monthValue}/${history[index].date.year}")
 						}
 						Button({

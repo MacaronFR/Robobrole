@@ -56,6 +56,9 @@ interface EventDAO {
 	@Query("DELETE FROM event")
 	fun wipeTable()
 
+	@Query("DELETE FROM event WHERE match = :match")
+	fun deleteMatch(match: Long)
+
 	@Query("SELECT * FROM event WHERE team = :team AND quart = :quart AND type = :type AND data = :data ORDER BY time DESC")
 	fun getSpecificEventDesc(team: String, quart: Int, type: Type, data: String): List<Event>
 

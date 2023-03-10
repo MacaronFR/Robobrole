@@ -12,12 +12,12 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,7 +34,7 @@ import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 import java.lang.NumberFormatException
 
-@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class, ExperimentalMaterialApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 	var players: List<Player> by remember { mutableStateOf(listOf()) }
