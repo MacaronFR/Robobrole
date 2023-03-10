@@ -72,8 +72,7 @@ class MatchState {
 
 	fun loadPlayers(db: AppDatabase){
 		if(!done){
-			players.addAll(db.matchPlayerDao().getAll().map { db.playerDao().get(it.player)!! })
-			println(players.size)
+			players.addAll(db.matchPlayerDao().getAll().map { db.playerDao().get(it.player)!! }.sortedBy { it.name })
 		}
 	}
 

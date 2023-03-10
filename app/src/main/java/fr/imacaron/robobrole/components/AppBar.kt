@@ -6,19 +6,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import fr.imacaron.robobrole.R
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.types.MatchState
@@ -61,9 +57,9 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 					}
 				}
 				if(prefState.theme == Theme.Dark){
-					Icon(ImageVector.vectorResource(R.drawable.sun), null)
+					Icon(Icons.Outlined.LightMode, null)
 				}else if(prefState.theme == Theme.Light){
-					Icon(ImageVector.vectorResource(R.drawable.moon), null)
+					Icon(Icons.Outlined.DarkMode, null)
 				}
 			}
 			if(uiState.export){
@@ -74,7 +70,7 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 						}
 					}
 				){
-					Icon(ImageVector.vectorResource(R.drawable.file_copy), null)
+					Icon(Icons.Outlined.ImportExport, null)
 				}
 			}
 			Box{
@@ -88,14 +84,14 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 							nav.navigate("team")
 							uiState.toggleMenu()
 						},
-						leadingIcon = { Icon(Icons.Outlined.Person, null) }
+						leadingIcon = { Icon(Icons.Outlined.Groups, null) }
 					)
 					DropdownMenuItem(
 						text = { Text(if(prefState.left) "Gaucher" else "Droitier") },
 						onClick = {
 							prefState.toggleLeftHanded()
 						},
-						leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.back_hand), null, Modifier.scale(if(prefState.left) -1f else 1f, 1f)) }
+						leadingIcon = { Icon(Icons.Outlined.BackHand, null, Modifier.scale(if(prefState.left) -1f else 1f, 1f)) }
 					)
 					DropdownMenuItem(
 						text = { Text("Réinitialiser les paramètre") },

@@ -67,6 +67,7 @@ dependencies {
 	implementation("androidx.room:room-runtime:$room_version")
 	implementation("androidx.compose.ui:ui-util:1.3.3")
 	implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
+	implementation("androidx.compose.material:material-icons-extended:1.3.1")
 	annotationProcessor("androidx.room:room-compiler:$room_version")
 	ksp("androidx.room:room-compiler:$room_version")
 	testImplementation("junit:junit:4.13.2")
