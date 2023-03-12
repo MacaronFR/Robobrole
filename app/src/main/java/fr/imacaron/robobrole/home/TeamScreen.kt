@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,9 @@ import fr.imacaron.robobrole.types.UIState
 import kotlinx.coroutines.*
 import java.lang.NumberFormatException
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
+	ExperimentalMaterial3Api::class
+)
 @Composable
 fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 	var players: List<Player> by remember { mutableStateOf(listOf()) }
@@ -50,7 +53,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 			players = db.playerDao().getAll()
 		}
 	}
-	Column {
+	Card(Modifier.padding(8.dp, 8.dp)) {
 		OutlinedTextField(
 			prefState.team,
 			{ prefState.team = it },
@@ -95,7 +98,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 					},
 					dismissContent = {
 						Row(
-							Modifier.fillMaxWidth().height(72.dp).background(MaterialTheme.colorScheme.surface).padding(16.dp, 8.dp, 24.dp, 8.dp),
+							Modifier.fillMaxWidth().height(72.dp).background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp, 8.dp, 24.dp, 8.dp),
 							horizontalArrangement = Arrangement.spacedBy(16.dp),
 							verticalAlignment = Alignment.CenterVertically
 						) {

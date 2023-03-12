@@ -106,7 +106,7 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 				}
 			}
 			if(newMatchScreenState.teamError){
-				Text("Sélectionner 5 joueuses", Modifier.padding(8.dp, 0.dp, 8.dp, 8.dp), color = MaterialTheme.colorScheme.error)
+				Text("Sélectionner entre 5 et 10 joueuses", Modifier.padding(8.dp, 0.dp, 8.dp, 8.dp), color = MaterialTheme.colorScheme.error)
 			}
 		}
 		Button(
@@ -124,7 +124,7 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 				}else{
 					newMatchScreenState.levelError = false
 				}
-				if(playerSelected.filter { it }.size != 5){
+				if(playerSelected.filter { it }.size < 5 || playerSelected.filter { it }.size > 10 ){
 					ok = false
 					newMatchScreenState.teamError = true
 				}else {

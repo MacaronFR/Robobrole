@@ -120,7 +120,7 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quar
 fun PlayerSelector(players: List<Player>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
 	if(display){
 		AlertDialog(close, {}, text = {
-			LazyColumn(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+			LazyColumn(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
 				items(players){
 					Button(
 						{
@@ -128,7 +128,7 @@ fun PlayerSelector(players: List<Player>, display: Boolean, close: () -> Unit, o
 							close()
 						}
 					){
-						Text(it.name, style = MaterialTheme.typography.titleMedium)
+						Text(it.name, style = MaterialTheme.typography.headlineSmall)
 					}
 				}
 			}
