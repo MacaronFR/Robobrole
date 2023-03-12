@@ -28,6 +28,6 @@ interface MatchPlayerDao {
 	@Query("DELETE FROM match_player")
 	fun deleteAll()
 
-	@Query("UPDATE match_player SET present = :present WHERE id = :id")
-	fun setPresent(id: Long, present: Boolean)
+	@Query("UPDATE match_player SET present = :present WHERE player = :player")
+	fun setPresent(present: Boolean, player: Long): Int
 }

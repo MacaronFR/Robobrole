@@ -16,7 +16,7 @@ class PlayerMatch(private val db: AppDatabase, player: Player, onMatch: Boolean)
 	infix fun onMatch(isPresent: Boolean){
 		onMatch = isPresent
 		GlobalScope.launch(Dispatchers.IO){
-			db.matchPlayerDao().setPresent(player.id, isPresent)
+			db.matchPlayerDao().setPresent(isPresent, player.id)
 		}
 	}
 
@@ -91,6 +91,10 @@ class MatchState {
 
 	fun loadPlayers(db: AppDatabase){
 		if(!done){
+			db.matchPlayerDao().getAll().forEach {
+				val p = db.playerDao().get(it.player)
+				println("${p} ${it.InMatch} ${it.player}")
+			}
 			players.addAll(db.matchPlayerDao().getAll().map { PlayerMatch(db, db.playerDao().get(it.player)!!, it.InMatch) }.sortedBy { it.player.name })
 		}
 	}

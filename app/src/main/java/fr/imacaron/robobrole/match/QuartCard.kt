@@ -91,7 +91,7 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quar
 	val summary = matchState.getSummary(team, quart)
 	var player: Boolean by remember { mutableStateOf(false) }
 	var point: String by remember { mutableStateOf("") }
-	OutlinedCard(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
+	Column(modifier.requiredWidth(conf.screenWidthDp.dp).padding(8.dp)) {
 		Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth().padding(16.dp, 16.dp)) {
 			listOf("1", "2", "3").forEach {
 				PointButton(
