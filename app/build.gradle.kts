@@ -8,6 +8,21 @@ plugins {
 val compose_ui_version = "1.3.3"
 val room_version = "2.5.0"
 
+class RoomSchemaArgProvider(
+	@get:InputDirectory
+	@get:PathSensitive(PathSensitivity.RELATIVE)
+	val schemaDir: File
+) : CommandLineArgumentProvider {
+
+	override fun asArguments(): Iterable<String> {
+		return listOf("room.schemaLocation=${schemaDir.path}")
+	}
+}
+
+ksp {
+	arg(RoomSchemaArgProvider(File(projectDir, "schemas")))
+}
+
 android {
 	namespace = "fr.imacaron.robobrole"
 	compileSdk = 33
@@ -35,6 +50,7 @@ android {
 	compileOptions {
 		sourceCompatibility = JavaVersion.VERSION_17
 		targetCompatibility = JavaVersion.VERSION_17
+
 	}
 
 	buildFeatures {
