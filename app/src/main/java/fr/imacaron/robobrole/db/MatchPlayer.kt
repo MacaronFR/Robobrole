@@ -7,7 +7,9 @@ data class MatchPlayer(
 	@PrimaryKey(true) val id: Long,
 	@ColumnInfo(name = "player") val player: Long,
 	@ColumnInfo(name = "present", defaultValue = "false") val inMatch: Boolean
-)
+){
+	constructor(player: Player): this(0, player.id, false)
+}
 
 @Dao
 interface MatchPlayerDao {
