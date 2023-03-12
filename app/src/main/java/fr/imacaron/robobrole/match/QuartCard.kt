@@ -15,7 +15,6 @@ import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Event
-import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.MatchState
@@ -120,9 +119,10 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quar
 fun PlayerSelector(players: List<PlayerMatch>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
 	if(display){
 		AlertDialog(close, {}, title = { Text("Joueuse") }, text = {
-			LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+			LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8
+				.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
 				items(players.filter { it.onMatch }){
-					Button(
+					TextButton(
 						{
 							onSelect(it.player.name)
 							close()
