@@ -1,11 +1,11 @@
 package fr.imacaron.robobrole.match
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -119,8 +119,8 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quar
 @Composable
 fun PlayerSelector(players: List<Player>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
 	if(display){
-		AlertDialog(close, {}, text = {
-			LazyColumn(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+		AlertDialog(close, {}, title = { Text("Joueuse") }, text = {
+			LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
 				items(players){
 					Button(
 						{
