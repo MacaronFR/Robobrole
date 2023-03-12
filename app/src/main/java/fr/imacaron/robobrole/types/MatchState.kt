@@ -93,9 +93,9 @@ class MatchState {
 		if(!done){
 			db.matchPlayerDao().getAll().forEach {
 				val p = db.playerDao().get(it.player)
-				println("${p} ${it.InMatch} ${it.player}")
+				println("${p} ${it.inMatch} ${it.player}")
 			}
-			players.addAll(db.matchPlayerDao().getAll().map { PlayerMatch(db, db.playerDao().get(it.player)!!, it.InMatch) }.sortedBy { it.player.name })
+			players.addAll(db.matchPlayerDao().getAll().map { PlayerMatch(db, db.playerDao().get(it.player)!!, it.inMatch) }.sortedBy { it.player.name })
 		}
 	}
 
