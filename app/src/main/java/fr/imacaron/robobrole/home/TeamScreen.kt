@@ -48,7 +48,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 	var number: Int? by remember { mutableStateOf(null) }
 	uiState.home = false
 	uiState.title = "Équipe"
-	LaunchedEffect(add, edit, uiState.alert, reload){
+	LaunchedEffect(add, edit, uiState.alert, reload, uiState.home){
 		withContext(Dispatchers.IO){
 			players = db.playerDao().getAll()
 		}
@@ -119,9 +119,12 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 				)
 			}
 			item {
-				Button({
-					add = true
-				}) {
+				Button(
+					{
+						add = true
+					},
+					Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+				) {
 					Icon(Icons.Outlined.Add, null)
 					Text("Ajouter un joueur")
 				}

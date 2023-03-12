@@ -1,11 +1,5 @@
 package fr.imacaron.robobrole.components
 
-import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
-import android.media.MediaScannerConnection
-import android.net.Uri
-import android.provider.MediaStore
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
@@ -20,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
@@ -32,8 +25,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, DelicateCoroutinesApi::class)
 @Composable
@@ -87,14 +78,6 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 					Icon(Icons.Filled.MoreVert, null)
 				}
 				DropdownMenu(expanded = uiState.displayMenu, onDismissRequest = { uiState.closeMenu() }){
-					DropdownMenuItem(
-						text ={ Text("Mon équipe") },
-						onClick = {
-							nav.navigate("team")
-							uiState.toggleMenu()
-						},
-						leadingIcon = { Icon(Icons.Outlined.Groups, null) }
-					)
 					if(uiState.export){
 						DropdownMenuItem(
 							text = { Text("Télécharger") },

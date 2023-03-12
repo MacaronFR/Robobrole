@@ -57,7 +57,8 @@ class MainActivity : ComponentActivity() {
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = prefState.theme) {
 				Scaffold(
-					topBar = { AppBar(prefState, db, navController, uiState, matchState) }
+					topBar = { AppBar(prefState, db, navController, uiState, matchState) },
+					bottomBar = { Navigation(navController, db, uiState, matchState) }
 				) {
 					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
 						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
