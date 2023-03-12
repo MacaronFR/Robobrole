@@ -1,13 +1,19 @@
 package fr.imacaron.robobrole.match
 
+import android.widget.Toast
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.SwipeableState
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.swipeable
 import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +30,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
+import fr.imacaron.robobrole.db.MatchPlayer
+import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.types.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
@@ -33,6 +41,8 @@ import kotlin.math.roundToInt
 fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, current: Long, left: Boolean){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
+	var start: Boolean by remember { mutableStateOf(false) }
+	var change: Boolean by remember { mutableStateOf(false) }
 	val anchors = mutableMapOf<Float, Int>()
 	for( i in matchState.myTeamSum.indices){
 		anchors[i * -sizePx] = i
@@ -56,11 +66,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, curre
 				Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceAround){
 					ElevatedButton(
 						{
-							val matchStart = System.currentTimeMillis() / 1000
-							matchState.startAt = matchStart
-							GlobalScope.launch(Dispatchers.IO){
-								db.matchDao().setStart(matchStart, matchState.current)
-							}
+							start = true
 						},
 						enabled = matchState.startAt == 0L && !matchState.done
 					){ Text("Début du match") }
@@ -79,6 +85,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, curre
 					}
 				}
 			}
+			Button({ change = true }, enabled = matchState.startAt != 0L){ Text("Changement") }
 			OutlinedCard(Modifier.padding(0.dp, 8.dp).fillMaxWidth()) {
 				Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
 					TeamInfo(matchState.myTeam, matchState.myTeamSum, swipeState.targetValue)
@@ -88,6 +95,23 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, curre
 					TeamInfo(matchState.otherTeam, matchState.otherTeamSum, swipeState.targetValue)
 				}
 			}
+		}
+		if(start){
+			TeamSelector({ start = false }, {
+				start = false
+				val matchStart = System.currentTimeMillis() / 1000
+				matchState.startAt = matchStart
+				GlobalScope.launch(Dispatchers.IO){
+					db.matchDao().setStart(matchStart, matchState.current)
+				}
+			}, matchState.players)
+		}
+		if(change){
+			TeamSelector(
+				{ change = false },
+				{ change = false },
+				matchState.players
+			)
 		}
 		TeamCards(matchState, size.dp, sizePx, swipeState, anchors, left)
 	}
@@ -100,6 +124,37 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 		Text(summary.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
 		Text(summary[quart].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
 	}
+}
+
+@Composable
+fun TeamSelector(onDismiss: () -> Unit, onConfirm: () -> Unit, players: List<PlayerMatch>){
+	val context = LocalContext.current
+	AlertDialog(
+		onDismiss,
+		{ Button(
+			{
+				if(players.filter { it.onMatch }.size != 5){
+					Toast.makeText(context, "Selctionnez 5 joueur", Toast.LENGTH_SHORT).show()
+				}else{
+					onConfirm()
+				}
+			}
+		) {
+			Icon(Icons.Outlined.Check, null)
+			Text("Valider")
+		} },
+		title = { Text("Sélection Équipe") },
+		text = {
+			LazyColumn {
+				itemsIndexed(players){ i, p ->
+					Row {
+						Checkbox(p.onMatch, { players[i] onMatch it})
+						Text(p.player.name)
+					}
+				}
+			}
+		}
+	)
 }
 
 @OptIn(ExperimentalMaterialApi::class)

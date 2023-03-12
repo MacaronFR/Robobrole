@@ -19,6 +19,7 @@ import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.types.Gender
 import fr.imacaron.robobrole.types.MatchState
+import fr.imacaron.robobrole.types.PlayerMatch
 import kotlinx.coroutines.*
 
 @Composable
@@ -82,7 +83,6 @@ fun pointOnLongClick(matchState: MatchState, team: String, quart: Int, data: Str
 	}
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quart: Int, left: Boolean){
 	val conf = LocalConfiguration.current
@@ -117,18 +117,18 @@ fun QuartCard(modifier: Modifier, matchState: MatchState, ownTeam: Boolean, quar
 }
 
 @Composable
-fun PlayerSelector(players: List<Player>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
+fun PlayerSelector(players: List<PlayerMatch>, display: Boolean, close: () -> Unit, onSelect: (player: String) -> Unit){
 	if(display){
 		AlertDialog(close, {}, title = { Text("Joueuse") }, text = {
 			LazyVerticalGrid(GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-				items(players){
+				items(players.filter { it.onMatch }){
 					Button(
 						{
-							onSelect(it.name)
+							onSelect(it.player.name)
 							close()
 						}
 					){
-						Text(it.name, style = MaterialTheme.typography.headlineSmall)
+						Text(it.player.name, style = MaterialTheme.typography.headlineSmall)
 					}
 				}
 			}

@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import fr.imacaron.robobrole.types.GenderConverter
 
-@Database(entities = [Event::class, Match::class, Player::class, MatchPlayer::class], version = 10)
+@Database(entities = [Event::class, Match::class, Player::class, MatchPlayer::class], version = 12)
 @TypeConverters(Converters::class, LocalDateConverters::class, GenderConverter::class)
 abstract class AppDatabase: RoomDatabase(){
 	abstract fun eventDAO(): EventDAO

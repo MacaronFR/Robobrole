@@ -2,7 +2,26 @@ package fr.imacaron.robobrole.types
 
 import androidx.compose.runtime.*
 import fr.imacaron.robobrole.db.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+
+class PlayerMatch(private val db: AppDatabase, player: Player, onMatch: Boolean){
+	var onMatch: Boolean by mutableStateOf(onMatch)
+		private set
+
+	@OptIn(DelicateCoroutinesApi::class)
+	infix fun onMatch(isPresent: Boolean){
+		onMatch = isPresent
+		GlobalScope.launch(Dispatchers.IO){
+			db.matchPlayerDao().setPresent(player.id, isPresent)
+		}
+	}
+
+	var player: Player by mutableStateOf(player)
+}
 
 @Stable
 class MatchState {
@@ -21,7 +40,7 @@ class MatchState {
 
 	var otherTeam: String by mutableStateOf("")
 
-	val players: MutableList<Player> = mutableStateListOf()
+	val players: MutableList<PlayerMatch> = mutableStateListOf()
 
 	var done: Boolean by mutableStateOf(false)
 
@@ -72,7 +91,7 @@ class MatchState {
 
 	fun loadPlayers(db: AppDatabase){
 		if(!done){
-			players.addAll(db.matchPlayerDao().getAll().map { db.playerDao().get(it.player)!! }.sortedBy { it.name })
+			players.addAll(db.matchPlayerDao().getAll().map { PlayerMatch(db, db.playerDao().get(it.player)!!, it.InMatch) }.sortedBy { it.player.name })
 		}
 	}
 
