@@ -1,10 +1,10 @@
 package fr.imacaron.robobrole.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import fr.imacaron.robobrole.types.Theme
 
 
@@ -76,15 +76,14 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun RobobroleTheme(darkTheme: Theme = Theme.Default, content: @Composable () -> Unit) {
     val colors = if (darkTheme == Theme.Dark) {
-        DarkColors
+        dynamicDarkColorScheme(LocalContext.current)
     } else if(darkTheme == Theme.Light){
-        LightColors
+        dynamicLightColorScheme(LocalContext.current)
     } else if(isSystemInDarkTheme()){
-        DarkColors
+        dynamicDarkColorScheme(LocalContext.current)
     }else {
-        LightColors
+        dynamicLightColorScheme(LocalContext.current)
     }
-
     MaterialTheme(
         colorScheme = colors,
         content = content

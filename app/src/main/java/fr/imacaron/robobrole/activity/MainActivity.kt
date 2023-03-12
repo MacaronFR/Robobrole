@@ -1,6 +1,7 @@
 package fr.imacaron.robobrole.activity
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
@@ -9,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
+import androidx.core.content.FileProvider
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,10 +30,10 @@ import fr.imacaron.robobrole.types.MatchState
 import fr.imacaron.robobrole.types.PrefState
 import fr.imacaron.robobrole.types.UIState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
 import java.lang.StringBuilder
@@ -77,9 +79,32 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 
+	@OptIn(DelicateCoroutinesApi::class)
+	fun share(matchState: MatchState){
+		GlobalScope.launch(Dispatchers.IO){
+			val data = getCsv(matchState.events, matchState.myTeam, matchState.otherTeam)
+			filesDir.resolve("match").apply {
+				if(!exists()){
+					mkdir()
+				}
+			}
+			val f = File(filesDir, "match/match.csv")
+			val out = FileOutputStream(f)
+			out.write(data.toByteArray())
+			out.close()
+			val shareIntent = Intent().apply {
+				action = Intent.ACTION_SEND
+				addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+				putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this@MainActivity, "fr.imacaron.robobrole", f))
+				type = "text/csv"
+			}
+			startActivity(Intent.createChooser(shareIntent, "Test"))
+		}
+	}
+
 	suspend fun export(matchState: MatchState){
 		val data = getCsv(matchState.events, matchState.myTeam, matchState.otherTeam)
-		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 		val initName = "${matchState.myTeam}-${matchState.otherTeam}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
 		var name = "$initName.csv"
 		var index = 0
@@ -108,7 +133,7 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 
-	private fun getCsv(events: List<Event>, own: String, other: String): String {
+	fun getCsv(events: List<Event>, own: String, other: String): String {
 		val res = StringBuilder()
 		res.appendLine("Quart;Temps;$own;$other;Player")
 		events.forEach { e ->

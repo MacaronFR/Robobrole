@@ -91,7 +91,7 @@ fun MatchScreen(matchState: MatchState, db: AppDatabase, uiState: UIState, curre
 				}
 				TeamInfo(matchState.otherTeam, matchState.otherTeamSum, swipeState.targetValue)
 			}
-			Button({ change = true }, enabled = matchState.startAt != 0L){ Text("Changement") }
+			Button({ change = true }, enabled = matchState.startAt != 0L && !matchState.done){ Text("Changement") }
 		}
 		if(start){
 			TeamSelector({ start = false }, {
