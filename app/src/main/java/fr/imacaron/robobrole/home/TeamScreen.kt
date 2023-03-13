@@ -30,8 +30,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Player
-import fr.imacaron.robobrole.types.PrefState
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.state.PrefState
+import fr.imacaron.robobrole.state.UIState
 import kotlinx.coroutines.*
 import java.lang.NumberFormatException
 
@@ -140,7 +140,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 				TextButton({
 					GlobalScope.launch(Dispatchers.IO){
 						if(number != null && name != ""){
-							println(db.playerDao().insertPlayer(Player(name, number!!)))
+							db.playerDao().insertPlayer(Player(name, number!!))
 							withContext(Dispatchers.Main){
 								add = false
 								name = ""

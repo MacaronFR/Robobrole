@@ -20,8 +20,8 @@ import fr.imacaron.robobrole.db.Match
 import fr.imacaron.robobrole.db.MatchPlayer
 import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.types.Gender
-import fr.imacaron.robobrole.types.PrefState
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.state.PrefState
+import fr.imacaron.robobrole.state.UIState
 import kotlinx.coroutines.*
 
 val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
@@ -132,9 +132,9 @@ fun NewMatchScreen(navController: NavController, db: AppDatabase, uiState: UISta
 				}
 				if(ok){
 					val info = Match(prefState.team, newMatchScreenState.otherTeam, newMatchScreenState.level, if(newMatchScreenState.women) Gender.Women else Gender.Men)
-					val matchPlayers = players.filterIndexed { index, _ -> playerSelected[index] }.map { MatchPlayer(it) }
 					GlobalScope.launch{
 						val id = db.matchDao().insertInfo(info)
+						val matchPlayers = players.filterIndexed { index, _ -> playerSelected[index] }.map { MatchPlayer(it, id) }
 						db.matchPlayerDao().insertAll(matchPlayers)
 						withContext(Dispatchers.Main){
 							navController.navigate("match/$id"){ popUpTo("home") }

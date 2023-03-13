@@ -8,8 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.types.MatchState
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.state.MatchState
+import fr.imacaron.robobrole.state.UIState
 import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)

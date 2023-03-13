@@ -1,4 +1,4 @@
-package fr.imacaron.robobrole.types
+package fr.imacaron.robobrole.state
 
 import android.content.SharedPreferences
 import androidx.compose.runtime.Stable
@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.edit
+import fr.imacaron.robobrole.types.Theme
 
 @Stable
 class PrefState(val sharedPref: SharedPreferences) {

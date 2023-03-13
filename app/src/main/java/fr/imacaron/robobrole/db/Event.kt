@@ -23,6 +23,8 @@ data class Event(
 ){
 	constructor(type: Type, team: String, player: String, data: String, time: Long, quart: Int, match: Long): this(0, type, team, player, data, time, quart, match)
 
+	constructor(type: Type, team: String, player: String, data: String, quart: Int, match:Long, startAt: Long): this(type, team, player, data, (System.currentTimeMillis() / 1000) - startAt, quart, match)
+
 	companion object {
 		operator fun invoke(data: String): Event{
 			val d = data.split(';')

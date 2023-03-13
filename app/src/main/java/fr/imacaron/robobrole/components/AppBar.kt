@@ -17,10 +17,10 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.activity.MainActivity
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.types.MatchState
-import fr.imacaron.robobrole.types.PrefState
+import fr.imacaron.robobrole.state.MatchState
+import fr.imacaron.robobrole.state.PrefState
 import fr.imacaron.robobrole.types.Theme
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.state.UIState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -83,7 +83,7 @@ fun AppBar(prefState: PrefState, db: AppDatabase, nav: NavController, uiState: U
 							text = { Text("Télécharger") },
 							onClick = {
 								GlobalScope.launch(Dispatchers.IO){
-									activity.export(matchState)
+									activity.download(matchState)
 								}
 							},
 							leadingIcon = { Icon(Icons.Outlined.Download, null) }

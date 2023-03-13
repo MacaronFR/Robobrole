@@ -3,6 +3,7 @@ package fr.imacaron.robobrole.home
 import android.view.MotionEvent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material3.*
@@ -15,13 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.db.Match
-import fr.imacaron.robobrole.types.MatchState
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.state.UIState
 import kotlinx.coroutines.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState, matchState: MatchState){
+fun HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState){
 	var history: List<Match> by remember { mutableStateOf(listOf()) }
 	uiState.home = true
 	uiState.export = false
@@ -35,7 +35,7 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 		Card(Modifier.padding(8.dp).fillMaxWidth()) {
 			Text("Historique :", Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
 			LazyColumn {
-				items(history.size){index ->
+				itemsIndexed(history){index, match ->
 					if(index != 0){
 						Divider(Modifier.fillMaxWidth().padding(16.dp, 0.dp), 1.dp, MaterialTheme.colorScheme.outline)
 					}
@@ -49,8 +49,7 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 										true
 									}
 									MotionEvent.ACTION_UP -> {
-										matchState.clean()
-										navController.navigate("match/${history[index].uid}")
+										navController.navigate("match/${match.uid}")
 										true
 									}
 									else -> false
@@ -58,8 +57,8 @@ fun  HomeScreen(navController: NavController, db: AppDatabase, uiState: UIState,
 												  },
 						verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
 						Column {
-							Text("${history[index].myTeam} - ${history[index].otherTeam} | ${history[index].level}${history[index].gender.value}", style = MaterialTheme.typography.titleMedium)
-							Text("${history[index].date.dayOfMonth}/${history[index].date.monthValue}/${history[index].date.year}")
+							Text("${match.myTeam} - ${match.otherTeam} | ${match.level}${match.gender.value}", style = MaterialTheme.typography.titleMedium)
+							Text("${match.date.dayOfMonth}/${match.date.monthValue}/${match.date.year}")
 						}
 						IconButton({}, Modifier.size(24.dp)) {
 							Icon(Icons.Outlined.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)

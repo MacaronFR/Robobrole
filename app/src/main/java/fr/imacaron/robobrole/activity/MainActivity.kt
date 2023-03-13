@@ -17,18 +17,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.room.Room
-import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.components.AppBar
 import fr.imacaron.robobrole.db.AppDatabase
-import fr.imacaron.robobrole.db.Event
 import fr.imacaron.robobrole.drawer.*
 import fr.imacaron.robobrole.home.HomeScreen
-import fr.imacaron.robobrole.match.NewMatchScreen
-import fr.imacaron.robobrole.match.StatScreen
 import fr.imacaron.robobrole.home.TeamScreen
-import fr.imacaron.robobrole.types.MatchState
-import fr.imacaron.robobrole.types.PrefState
-import fr.imacaron.robobrole.types.UIState
+import fr.imacaron.robobrole.match.MatchScreen
+import fr.imacaron.robobrole.match.NewMatchScreen
+import fr.imacaron.robobrole.service.MatchService
+import fr.imacaron.robobrole.service.ShareDownloadService
+import fr.imacaron.robobrole.state.MatchState
+import fr.imacaron.robobrole.state.PrefState
+import fr.imacaron.robobrole.state.UIState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 import kotlinx.coroutines.*
 
@@ -36,9 +36,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
 import java.io.IOException
-import java.lang.StringBuilder
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), ShareDownloadService {
 
 	lateinit var db: AppDatabase
 
@@ -53,37 +52,36 @@ class MainActivity : ComponentActivity() {
 		val matchState = MatchState()
 		val prefState = PrefState(sharedPref)
 		val uiState = UIState()
+		val matchService = MatchService(db, matchState)
 		setContent {
 			val navController = rememberNavController()
+			val navController2 = rememberNavController()
 			RobobroleTheme(darkTheme = prefState.theme) {
-				Scaffold(
-					topBar = { AppBar(prefState, db, navController, uiState, matchState) },
-					bottomBar = { Navigation(navController, db, uiState, matchState) }
-				) {
-					NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)){
-						composable("home"){ HomeScreen(navController, db, uiState, matchState) }
-						composable("new_match"){ NewMatchScreen(navController, db, uiState, prefState) }
-						composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(matchState, db, uiState, entries.arguments!!.getLong("current"), prefState.left) }
-						composable("stat"){ StatScreen(matchState) }
-						composable("team"){ TeamScreen(db, uiState, prefState) }
+				NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize()){
+					composable("home"){
+						Scaffold(
+							topBar = { AppBar(prefState, db, navController2, uiState, matchState) },
+							bottomBar = { Navigation(navController2, db, uiState, matchState) }
+						) {
+							Box(Modifier.fillMaxSize().padding(it)){
+								NavHost(navController2, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)) {
+									composable("home"){ HomeScreen(navController, db, uiState) }
+									composable("new_match"){ NewMatchScreen(navController2, db, uiState, prefState) }
+									composable("team"){ TeamScreen(db, uiState, prefState) }
+								}
+							}
+						}
 					}
+					composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(navController, matchService, entries.arguments!!.getLong("current"), this@MainActivity) }
 				}
 			}
 		}
 	}
 
-	suspend fun save(state: MatchState) {
-		state.done = true
-		db.matchDao().setDone(state.current)
-		withContext(Dispatchers.Main){
-			Toast.makeText(baseContext, "Sauvegardé", Toast.LENGTH_SHORT).show()
-		}
-	}
-
 	@OptIn(DelicateCoroutinesApi::class)
-	fun share(matchState: MatchState){
+	override fun share(matchState: MatchState){
 		GlobalScope.launch(Dispatchers.IO){
-			val data = getCsv(matchState.events, matchState.myTeam, matchState.otherTeam)
+			val data = getCsv(matchState)
 			filesDir.resolve("match").apply {
 				if(!exists()){
 					mkdir()
@@ -103,8 +101,8 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 
-	suspend fun export(matchState: MatchState){
-		val data = getCsv(matchState.events, matchState.myTeam, matchState.otherTeam)
+	override fun download(matchState: MatchState){
+		val data = getCsv(matchState)
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 		val initName = "${matchState.myTeam}-${matchState.otherTeam}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
 		var name = "$initName.csv"
@@ -117,36 +115,27 @@ class MainActivity : ComponentActivity() {
 		saveFile(dir, name, data)
 	}
 
-	private suspend fun saveFile(dir: File, fileName: String, data: String) {
-		val f = File(dir, fileName)
-		try {
-			val fw = FileWriter(f)
-			fw.append(data)
-			fw.close()
-			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Exporté", Toast.LENGTH_SHORT).show()
+	@OptIn(DelicateCoroutinesApi::class)
+	private fun saveFile(dir: File, fileName: String, data: String) {
+		GlobalScope.launch(Dispatchers.IO){
+			val f = File(dir, fileName)
+			try {
+				val fw = FileWriter(f)
+				fw.append(data)
+				fw.close()
+				withContext(Dispatchers.Main){
+					Toast.makeText(baseContext, "Téléchargé", Toast.LENGTH_SHORT).show()
+				}
+			} catch (e: IOException) {
+				withContext(Dispatchers.Main){
+					Toast.makeText(baseContext, "Erreur lors du téléchargement", Toast.LENGTH_SHORT).show()
+				}
+				e.printStackTrace()
 			}
-		} catch (e: IOException) {
-			withContext(Dispatchers.Main){
-				Toast.makeText(baseContext, "Erreur lors de l'exportation", Toast.LENGTH_SHORT).show()
-			}
-			e.printStackTrace()
 		}
 	}
 
-	fun getCsv(events: List<Event>, own: String, other: String): String {
-		val res = StringBuilder()
-		res.appendLine("Quart;Temps;$own;$other;Player")
-		events.forEach { e ->
-			when(e.team){
-				own -> res.appendLine("${e.quart};${e.time};${e.data};0;${e.player}")
-				other -> res.appendLine("${e.quart};${e.time};0;${e.data};${e.player}")
-			}
-		}
-		return res.toString()
-	}
-
-	suspend fun removeAllSave(){
+	fun removeAllSave(){
 		filesDir.listFiles()?.forEach { it.delete() }
 	}
 
