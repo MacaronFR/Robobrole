@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.swipeable
@@ -54,7 +54,7 @@ fun MatchAppBar(service: MatchService, navController: NavController, shareDownlo
 				}){
 					Icon(Icons.Outlined.Download, "Download")
 				}
-			}else {
+			}else if(service.start){
 				IconButton({
 					service.save()
 				}){
@@ -67,10 +67,30 @@ fun MatchAppBar(service: MatchService, navController: NavController, shareDownlo
 
 @Composable
 fun MatchFab(service: MatchService, shareDownload: ShareDownloadService){
+	var selector: Boolean by remember { mutableStateOf(false) }
+	val selected: MutableList<PlayerMatch> = remember { mutableStateListOf() }
 	if(service.done){
 		FloatingActionButton({ shareDownload.share(service.state) }){ Icon(Icons.Outlined.Share, "Share") }
 	}else if(!service.start){
-		FloatingActionButton({ service.start(System.currentTimeMillis() / 1000) }){ Icon(Icons.Outlined.PlayArrow, "Start") }
+		FloatingActionButton({ selector = true }){ Icon(Icons.Outlined.PlayArrow, "Start") }
+	}
+	if(selector){
+		TeamSelector(
+			{ selector = false },
+			{
+				service.start(System.currentTimeMillis() / 1000)
+				selected.forEach { service.changeIn(it) }
+				selector = false
+			},
+			{ s, player ->
+				if(s){
+					selected.add(player)
+					player onMatch true
+				} else{
+					selected.remove(player)
+					player onMatch false
+				} },
+			players = service.players)
 	}
 }
 
@@ -80,13 +100,13 @@ fun MatchScreen(navController: NavController, matchService: MatchService, curren
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
-	for (i in matchService.myTeamSummary.indices) {
+	for (i in 1..matchService.myTeamSummary.size) {
 		anchors[i * -sizePx] = i
 	}
 	LaunchedEffect(current){
 		matchService.loadMatch(current)
 	}
-	val swipeState = rememberSwipeableState(0) {
+	val swipeState = rememberSwipeableState(1) {
 		matchService.quart = it
 		true
 	}
@@ -105,7 +125,7 @@ fun MatchScreen(navController: NavController, matchService: MatchService, curren
 					orientation = Orientation.Horizontal
 				)
 			) {
-				for (i in matchService.myTeamSummary.indices) {
+				for (i in 1..matchService.myTeamSummary.size) {
 					ElevatedCard(
 						Modifier.requiredWidth(size.dp).padding(horizontal = 8.dp).offset { IntOffset((swipeState.offset.value + sizePx * i).roundToInt(), 0) }
 					){
@@ -122,7 +142,7 @@ fun MatchBoard(service: MatchService){
 	Row(verticalAlignment = Alignment.CenterVertically) {
 		TeamInfo(service.myTeam, service.myTeamSummary, service.quart)
 		Column(Modifier.weight(0.10f)) {
-			Text("Q${service.quart + 1}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
+			Text("Q${service.quart}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
 		}
 		TeamInfo(service.otherTeam, service.otherTeamSummary, service.quart)
 	}
@@ -133,7 +153,7 @@ fun FauteChange(service: MatchService){
 	var teamSelector: Boolean by remember { mutableStateOf(false) }
 	Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
 		Button({}){ Text("Faute") }
-		Button({ teamSelector = true }, /*enabled = service.start && !service.done*/){ Text("Changement") }
+		Button({ teamSelector = true }, enabled = service.start && !service.done){ Text("Changement") }
 		if(teamSelector){
 			TeamSelector(
 				{ teamSelector = false },
@@ -156,7 +176,7 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 	Column(Modifier.weight(0.45f)) {
 		Text(name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
 		Text(summary.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
-		Text(summary[quart].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+		Text(summary[quart - 1].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
 	}
 }
 
@@ -174,7 +194,7 @@ fun MyTeam(service: MatchService, quart: Int){
 	var displaySelector: Boolean by remember { mutableStateOf(false) }
 	var amount: Int by remember { mutableStateOf(1) }
 	val team = service.myTeam
-	val summary = service.myTeamSummary[quart]
+	val summary = service.myTeamSummary[quart-1]
 	Column {
 		Row(Modifier.fillMaxWidth().padding(16.dp, 16.dp), horizontalArrangement = Arrangement.SpaceAround){
 			PointButton({ displaySelector = true; amount = 1 }, { service.removePoint(1, team) }, service.start && !service.done, "1"){ Text(summary.one.toString()) }
@@ -182,7 +202,7 @@ fun MyTeam(service: MatchService, quart: Int){
 			PointButton({ displaySelector = true; amount = 3 }, { service.removePoint(3, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
 		}
 		Row{
-			Text("Q${service.quart+1}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
+			Text("Q${service.quart}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
 			Text(team, Modifier.weight(0.8f), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 			Text(summary.total().toString(), Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), style = MaterialTheme.typography.headlineSmall)
 		}
@@ -217,15 +237,15 @@ fun PlayerSelector(players: List<PlayerMatch>, onDismiss: () -> Unit, onSelect: 
 @Composable
 fun OtherTeam(service: MatchService, quart: Int){
 	val team = service.otherTeam
-	val summary = service.otherTeamSummary[quart]
+	val summary = service.otherTeamSummary[quart-1]
 	Column {
 		Row(Modifier.fillMaxWidth().padding(16.dp, 16.dp), horizontalArrangement = Arrangement.SpaceAround){
 			PointButton({ service.addPoint(1, team) }, { service.removePoint(1, team) }, service.start && !service.done, "1"){ Text(summary.one.toString()) }
-			PointButton({ service.addPoint(1, team) }, { service.removePoint(1, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
-			PointButton({ service.addPoint(1, team) }, { service.removePoint(1, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
+			PointButton({ service.addPoint(2, team) }, { service.removePoint(1, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
+			PointButton({ service.addPoint(3, team) }, { service.removePoint(1, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
 		}
 		Row(Modifier.padding(bottom = 8.dp)){
-			Text("Q${service.quart+1}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
+			Text("Q${service.quart}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
 			Text(team, Modifier.weight(0.8f), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
 			Text(summary.total().toString(), Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), style = MaterialTheme.typography.headlineSmall)
 		}
@@ -264,7 +284,7 @@ fun TeamSelector(onDismiss: () -> Unit, onConfirm: () -> Unit, onPlayerChange: (
 		title = { Text("Sélection Équipe") },
 		text = {
 			LazyColumn {
-				itemsIndexed(players){ i, p ->
+				items(players){ p ->
 					Row(verticalAlignment = Alignment.CenterVertically) {
 						Checkbox(p.onMatch, { onPlayerChange(it, p) })
 						Text(p.player.name)

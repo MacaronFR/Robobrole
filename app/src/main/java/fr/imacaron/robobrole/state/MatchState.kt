@@ -35,7 +35,7 @@ class MatchState {
 
 	var startAt: Long by mutableStateOf(0)
 
-	var quart: Int by mutableStateOf(0)
+	var quart: Int by mutableStateOf(1)
 
 	var level: String by mutableStateOf("")
 
@@ -60,7 +60,7 @@ class MatchState {
 	}
 
 	fun clean(){
-		quart = 0
+		quart = 1
 		date = LocalDate.now()
 		current = -1
 		gender = Gender.Women

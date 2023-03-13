@@ -23,8 +23,9 @@ import fr.imacaron.robobrole.drawer.*
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.home.TeamScreen
 import fr.imacaron.robobrole.match.MatchScreen
-import fr.imacaron.robobrole.match.NewMatchScreen
+import fr.imacaron.robobrole.match.NewNewMatchScreen
 import fr.imacaron.robobrole.service.MatchService
+import fr.imacaron.robobrole.service.NewMatchService
 import fr.imacaron.robobrole.service.ShareDownloadService
 import fr.imacaron.robobrole.state.MatchState
 import fr.imacaron.robobrole.state.PrefState
@@ -53,26 +54,24 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		val prefState = PrefState(sharedPref)
 		val uiState = UIState()
 		val matchService = MatchService(db, matchState)
+		val newMatchService = NewMatchService(db, prefState.team)
 		setContent {
 			val navController = rememberNavController()
-			val navController2 = rememberNavController()
 			RobobroleTheme(darkTheme = prefState.theme) {
 				NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize()){
 					composable("home"){
 						Scaffold(
-							topBar = { AppBar(prefState, db, navController2, uiState, matchState) },
-							bottomBar = { Navigation(navController2, db, uiState, matchState) }
+							topBar = { AppBar(prefState, db, navController, uiState, matchState) },
+							bottomBar = { Navigation(navController, db, uiState, matchState) }
 						) {
 							Box(Modifier.fillMaxSize().padding(it)){
-								NavHost(navController2, startDestination = "home", modifier = Modifier.fillMaxSize().padding(it)) {
-									composable("home"){ HomeScreen(navController, db, uiState) }
-									composable("new_match"){ NewMatchScreen(navController2, db, uiState, prefState) }
-									composable("team"){ TeamScreen(db, uiState, prefState) }
-								}
+								HomeScreen(navController, db, uiState)
 							}
 						}
 					}
-					composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })){ entries -> MatchScreen(navController, matchService, entries.arguments!!.getLong("current"), this@MainActivity) }
+					composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })) { entries -> MatchScreen(navController, matchService, entries.arguments!!.getLong("current"), this@MainActivity) }
+					composable("new_match") { NewNewMatchScreen(newMatchService, navController) }
+					composable("team") { TeamScreen(db, uiState, prefState) }
 				}
 			}
 		}

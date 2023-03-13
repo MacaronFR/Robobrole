@@ -27,7 +27,7 @@ class MatchService(private val db: AppDatabase, val state: MatchState) {
 	var quart: Int
 		get() = state.quart
 		set(value) {
-			if(value < 0 || value > 3){
+			if(value < 1 || value > 4){
 				throw IllegalArgumentException()
 			}
 			state.quart = value
@@ -137,6 +137,7 @@ class MatchService(private val db: AppDatabase, val state: MatchState) {
 		state.myTeam = match.myTeam
 		state.otherTeam = match.otherTeam
 		state.done = match.done
+		state.level = match.level
 	}
 
 	private fun loadEvents(){
