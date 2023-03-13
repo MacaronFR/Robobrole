@@ -66,7 +66,10 @@ class NewMatchService(private val db: AppDatabase, val myTeam: String) {
 		}
 
 	suspend fun createMatch(): Long = withContext(Dispatchers.IO){
-		db.matchDao().insertInfo(Match(myTeam, state.otherTeam, state.level, if(state.women) Gender.Women else Gender.Men))
+		val match = db.matchDao().insertInfo(Match(myTeam, state.otherTeam, state.level, if(state.women) Gender.Women else Gender.Men))
+		state.clear()
+		ui.clear()
+		match
 	}
 
 	suspend fun createPlayer(match: Long){

@@ -14,6 +14,13 @@ class NewMatchState {
 
 	val players: MutableMap<Player, Boolean> = mutableStateMapOf()
 
+	fun clear(){
+		otherTeam = ""
+		level = "Senior"
+		women = true
+		players.clear()
+	}
+
 }
 
 @Stable
@@ -23,4 +30,10 @@ class NewMatchUIState {
 	var teamError: Boolean by mutableStateOf(false)
 
 	var levelOpen: Boolean by mutableStateOf(false)
+
+	fun clear(){
+		otherError = false
+		teamError = false
+		levelOpen = false
+	}
 }

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
@@ -22,111 +23,110 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import fr.imacaron.robobrole.db.AppDatabase
+import androidx.navigation.NavController
 import fr.imacaron.robobrole.db.Player
-import fr.imacaron.robobrole.state.PrefState
-import fr.imacaron.robobrole.state.UIState
+import fr.imacaron.robobrole.service.TeamService
 import kotlinx.coroutines.*
 import java.lang.NumberFormatException
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class,
-	ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
-	var players: List<Player> by remember { mutableStateOf(listOf()) }
+fun TeamScreen(service: TeamService, navController: NavController){
 	var add: Boolean by remember { mutableStateOf(false) }
-	var reload: Boolean by remember { mutableStateOf(false) }
 	var edit: Player? by remember { mutableStateOf(null) }
 	var name: String by remember { mutableStateOf("") }
 	var number: Int? by remember { mutableStateOf(null) }
-	uiState.home = false
-	uiState.title = "Équipe"
-	LaunchedEffect(add, edit, uiState.alert, reload, uiState.home){
-		withContext(Dispatchers.IO){
-			players = db.playerDao().getAll()
+	Scaffold(
+		topBar = {
+			TopAppBar(
+				{ Text("Équipe" ) },
+				navigationIcon = { IconButton({ navController.navigateUp()} ){ Icon(Icons.Outlined.ArrowBack, "Back")} }
+			)
 		}
-	}
-	Card(Modifier.padding(8.dp, 8.dp)) {
-		OutlinedTextField(
-			prefState.team,
-			{ prefState.team = it },
-			Modifier.fillMaxWidth().padding(16.dp, 0.dp),
-			label = { Text("Nom de l'équipe") },
-			singleLine = true
-		)
-		Spacer(Modifier.height(16.dp))
-		LazyColumn(Modifier.fillMaxWidth().padding(vertical = 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-			items(players, { player: Player -> player.id }) { player ->
-				val dismissState = rememberDismissState(confirmStateChange = {
-					if( it == DismissValue.DismissedToStart){
-						GlobalScope.launch(Dispatchers.IO){
-							db.playerDao().delete(player)
-							reload = !reload
-						}
-					}
-					it == DismissValue.DismissedToStart
-				})
-				SwipeToDismiss(
-					state = dismissState,
-					directions = setOf(DismissDirection.EndToStart),
-					background = {
-						val direct = dismissState.dismissDirection ?: return@SwipeToDismiss
-						val alignement = when(direct){
-							DismissDirection.StartToEnd -> Alignment.CenterStart
-							DismissDirection.EndToStart -> Alignment.CenterEnd
-						}
-						val icon = when (direct) {
-							DismissDirection.StartToEnd -> Icons.Default.Done
-							DismissDirection.EndToStart -> Icons.Default.Delete
-						}
-						val scale by animateFloatAsState(
-							if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-						)
-						Box(
-							Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 20.dp),
-							contentAlignment = alignement
-						) {
-							Icon(icon, contentDescription = null, modifier = Modifier.scale(scale), tint = MaterialTheme.colorScheme.onErrorContainer)
-						}
-					},
-					dismissContent = {
-						Row(
-							Modifier.fillMaxWidth().height(72.dp).background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp, 8.dp, 24.dp, 8.dp),
-							horizontalArrangement = Arrangement.spacedBy(16.dp),
-							verticalAlignment = Alignment.CenterVertically
-						) {
-							Column{
-								Text(player.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
-								Text(player.number.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-							}
-							Spacer(Modifier.weight(1f))
-							IconButton({
-								edit = player
-								name = player.name
-								number = player.number
-							}, Modifier.size(24.dp)) {
-								Icon(Icons.Outlined.Edit, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-							}
-						}
-					}
+	){ p ->
+		Box(Modifier.padding(p)){
+			Card(Modifier.padding(8.dp, 8.dp)) {
+				OutlinedTextField(
+					service.team,
+					{ service.team = it },
+					Modifier.fillMaxWidth().padding(16.dp, 0.dp),
+					label = { Text("Nom de l'équipe") },
+					singleLine = true
 				)
-			}
-			item {
-				Button(
-					{
-						add = true
-					},
-					Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
-				) {
-					Icon(Icons.Outlined.Add, null)
-					Text("Ajouter un joueur")
+				Spacer(Modifier.height(16.dp))
+				LazyColumn(Modifier.fillMaxWidth().padding(vertical = 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+					items(service.players, { player: Player -> player.id }) { player ->
+						val dismissState = rememberDismissState(confirmStateChange = {
+							if( it == DismissValue.DismissedToStart){
+								GlobalScope.launch{
+									service.deletePlayer(player)
+								}
+							}
+							it == DismissValue.DismissedToStart
+						})
+						SwipeToDismiss(
+							state = dismissState,
+							directions = setOf(DismissDirection.EndToStart),
+							background = {
+								val direct = dismissState.dismissDirection ?: return@SwipeToDismiss
+								val alignement = when(direct){
+									DismissDirection.StartToEnd -> Alignment.CenterStart
+									DismissDirection.EndToStart -> Alignment.CenterEnd
+								}
+								val icon = when (direct) {
+									DismissDirection.StartToEnd -> Icons.Default.Done
+									DismissDirection.EndToStart -> Icons.Default.Delete
+								}
+								val scale by animateFloatAsState(
+									if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+								)
+								Box(
+									Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 20.dp),
+									contentAlignment = alignement
+								) {
+									Icon(icon, contentDescription = null, modifier = Modifier.scale(scale), tint = MaterialTheme.colorScheme.onErrorContainer)
+								}
+							},
+							dismissContent = {
+								Row(
+									Modifier.fillMaxWidth().height(72.dp).background(MaterialTheme.colorScheme.surfaceVariant).padding(16.dp, 8.dp, 24.dp, 8.dp),
+									horizontalArrangement = Arrangement.spacedBy(16.dp),
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									Column{
+										Text(player.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
+										Text(player.number.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+									}
+									Spacer(Modifier.weight(1f))
+									IconButton({
+										edit = player
+										name = player.name
+										number = player.number
+									}, Modifier.size(24.dp)) {
+										Icon(Icons.Outlined.Edit, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+									}
+								}
+							}
+						)
+					}
+					item {
+						Button(
+							{
+								add = true
+							},
+							Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+						) {
+							Icon(Icons.Outlined.Add, null)
+							Text("Ajouter un joueur")
+						}
+					}
 				}
 			}
 		}
@@ -138,9 +138,9 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 			},
 			confirmButton = {
 				TextButton({
-					GlobalScope.launch(Dispatchers.IO){
+					GlobalScope.launch{
 						if(number != null && name != ""){
-							db.playerDao().insertPlayer(Player(name, number!!))
+							service.createPlayer(Player(name, number!!))
 							withContext(Dispatchers.Main){
 								add = false
 								name = ""
@@ -170,7 +170,7 @@ fun TeamScreen(db: AppDatabase, uiState: UIState, prefState: PrefState){
 				TextButton({
 					GlobalScope.launch(Dispatchers.IO){
 						if(number != null && edit != null && name != ""){
-							db.playerDao().updatePlayer(Player(edit!!.id, name, number!!))
+							service.updatePlayer(Player(edit!!.id, name, number!!))
 							edit = null
 							name = ""
 							number = null

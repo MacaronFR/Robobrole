@@ -4,7 +4,7 @@ import androidx.room.*
 
 @Entity(tableName = "player")
 data class Player(
-	@PrimaryKey(true) val id: Long,
+	@PrimaryKey(true) var id: Long,
 	@ColumnInfo(name = "name") val name: String,
 	@ColumnInfo(name = "numero") val number: Int
 ){

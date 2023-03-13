@@ -98,6 +98,14 @@ class MatchService(private val db: AppDatabase, val state: MatchState) {
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)
+	fun fault(player: String){
+		val event = Event(Type.Fault, state.myTeam, player, "", state.quart, state.current, state.startAt)
+		GlobalScope.launch(Dispatchers.IO) {
+			db.eventDAO().insertEvent(event)
+		}
+	}
+
+	@OptIn(DelicateCoroutinesApi::class)
 	fun start(at: Long){
 		if(state.done || state.startAt != 0L){
 			throw IllegalStateException()

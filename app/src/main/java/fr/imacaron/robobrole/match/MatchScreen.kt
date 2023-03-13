@@ -50,6 +50,11 @@ fun MatchAppBar(service: MatchService, navController: NavController, shareDownlo
 		actions = {
 			if(service.done){
 				IconButton({
+					shareDownload.share(service.state)
+				}){
+					Icon(Icons.Outlined.Share, "Share")
+				}
+				IconButton({
 					shareDownload.download(service.state)
 				}){
 					Icon(Icons.Outlined.Download, "Download")
@@ -66,12 +71,10 @@ fun MatchAppBar(service: MatchService, navController: NavController, shareDownlo
 }
 
 @Composable
-fun MatchFab(service: MatchService, shareDownload: ShareDownloadService){
+fun MatchFab(service: MatchService){
 	var selector: Boolean by remember { mutableStateOf(false) }
 	val selected: MutableList<PlayerMatch> = remember { mutableStateListOf() }
-	if(service.done){
-		FloatingActionButton({ shareDownload.share(service.state) }){ Icon(Icons.Outlined.Share, "Share") }
-	}else if(!service.start){
+	if(!service.start){
 		FloatingActionButton({ selector = true }){ Icon(Icons.Outlined.PlayArrow, "Start") }
 	}
 	if(selector){
@@ -112,7 +115,7 @@ fun MatchScreen(navController: NavController, matchService: MatchService, curren
 	}
 	Scaffold(
 		topBar = { MatchAppBar(matchService, navController, shareDownload) },
-		floatingActionButton = { MatchFab(matchService, shareDownload) },
+		floatingActionButton = { MatchFab(matchService) },
 	) {
 		Column(Modifier.padding(it).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
 			MatchBoard(matchService)
@@ -151,6 +154,7 @@ fun MatchBoard(service: MatchService){
 @Composable
 fun FauteChange(service: MatchService){
 	var teamSelector: Boolean by remember { mutableStateOf(false) }
+	var playerSelector: Boolean by remember { mutableStateOf(false) }
 	Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
 		Button({}){ Text("Faute") }
 		Button({ teamSelector = true }, enabled = service.start && !service.done){ Text("Changement") }
@@ -167,6 +171,9 @@ fun FauteChange(service: MatchService){
 				},
 				service.players
 			)
+		}
+		if(playerSelector){
+			PlayerSelector(service.players, { playerSelector = false }, { service.fault(it) })
 		}
 	}
 }

@@ -27,6 +27,7 @@ import fr.imacaron.robobrole.match.NewNewMatchScreen
 import fr.imacaron.robobrole.service.MatchService
 import fr.imacaron.robobrole.service.NewMatchService
 import fr.imacaron.robobrole.service.ShareDownloadService
+import fr.imacaron.robobrole.service.TeamService
 import fr.imacaron.robobrole.state.MatchState
 import fr.imacaron.robobrole.state.PrefState
 import fr.imacaron.robobrole.state.UIState
@@ -47,7 +48,8 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		super.onCreate(savedInstanceState)
 		db = Room.databaseBuilder(
 			applicationContext,
-			AppDatabase::class.java, "match"
+			AppDatabase::class.java,
+			"match"
 		).fallbackToDestructiveMigration().build()
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 		val matchState = MatchState()
@@ -55,6 +57,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		val uiState = UIState()
 		val matchService = MatchService(db, matchState)
 		val newMatchService = NewMatchService(db, prefState.team)
+		val teamService = TeamService(db, prefState)
 		setContent {
 			val navController = rememberNavController()
 			RobobroleTheme(darkTheme = prefState.theme) {
@@ -71,7 +74,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 					}
 					composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })) { entries -> MatchScreen(navController, matchService, entries.arguments!!.getLong("current"), this@MainActivity) }
 					composable("new_match") { NewNewMatchScreen(newMatchService, navController) }
-					composable("team") { TeamScreen(db, uiState, prefState) }
+					composable("team") { TeamScreen(teamService, navController) }
 				}
 			}
 		}
