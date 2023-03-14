@@ -9,12 +9,9 @@ import androidx.core.content.edit
 import fr.imacaron.robobrole.types.Theme
 
 @Stable
-class PrefState(val sharedPref: SharedPreferences) {
+class PrefState(private val sharedPref: SharedPreferences) {
 
 	var theme: Theme by mutableStateOf(Theme.values()[sharedPref.getInt("theme", Theme.Default.value)])
-		private set
-
-	var left: Boolean by mutableStateOf(sharedPref.getBoolean("left", false))
 		private set
 
 	private var teamName: String by mutableStateOf(sharedPref.getString("team", "")!!)
@@ -52,20 +49,6 @@ class PrefState(val sharedPref: SharedPreferences) {
 			sharedPref.edit {
 				putInt("theme", Theme.Default.value)
 			}
-		}
-	}
-
-	fun toggleLeftHanded(){
-		left = !left
-		sharedPref.edit {
-			putBoolean("left", left)
-		}
-	}
-
-	fun setDefaultHand(){
-		left = false
-		sharedPref.edit {
-			putBoolean("left", false)
 		}
 	}
 }

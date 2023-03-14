@@ -205,11 +205,7 @@ fun MyTeam(service: MatchService, quart: Int){
 			PointButton({ displaySelector = true; amount = 2 }, { service.removePoint(2, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
 			PointButton({ displaySelector = true; amount = 3 }, { service.removePoint(3, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
 		}
-		Row{
-			Text("Q${service.quart}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
-			Text(team, Modifier.weight(0.8f), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
-			Text(summary.total().toString(), Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), style = MaterialTheme.typography.headlineSmall)
-		}
+		QuartTeamPoint(quart, team, summary)
 	}
 	if(displaySelector){
 		PlayerSelector(service.players, { displaySelector = false }){
@@ -248,11 +244,16 @@ fun OtherTeam(service: MatchService, quart: Int){
 			PointButton({ service.addPoint(2, team) }, { service.removePoint(1, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
 			PointButton({ service.addPoint(3, team) }, { service.removePoint(1, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
 		}
-		Row(Modifier.padding(bottom = 8.dp)){
-			Text("Q${service.quart}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
-			Text(team, Modifier.weight(0.8f), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
-			Text(summary.total().toString(), Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), style = MaterialTheme.typography.headlineSmall)
-		}
+		QuartTeamPoint(quart, team, summary)
+	}
+}
+
+@Composable
+fun QuartTeamPoint(quart: Int, team: String, summary: Summary){
+	Row(Modifier.padding(bottom = 8.dp)){
+		Text("Q${quart}", Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), textAlign = TextAlign.End, style = MaterialTheme.typography.headlineSmall)
+		Text(team, Modifier.weight(0.8f), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineLarge)
+		Text(summary.total().toString(), Modifier.weight(0.1f), color = MaterialTheme.colorScheme.onSurface.copy(0.6f), style = MaterialTheme.typography.headlineSmall)
 	}
 }
 
@@ -276,7 +277,7 @@ fun TeamSelector(onDismiss: () -> Unit, onConfirm: () -> Unit, onPlayerChange: (
 		{ Button(
 			{
 				if(players.filter { it.onMatch }.size != 5){
-					Toast.makeText(context, "Selctionnez 5 joueur", Toast.LENGTH_SHORT).show()
+					Toast.makeText(context, "Sélectionnez 5 joueur", Toast.LENGTH_SHORT).show()
 				}else{
 					onConfirm()
 				}
