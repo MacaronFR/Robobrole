@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import fr.imacaron.robobrole.components.ButtonLong
 import fr.imacaron.robobrole.service.MatchService
+import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.ShareDownloadService
 import fr.imacaron.robobrole.state.*
 import fr.imacaron.robobrole.types.*
@@ -39,23 +39,23 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MatchAppBar(service: MatchService, navController: NavController, shareDownload: ShareDownloadService){
+fun MatchAppBar(service: MatchService, navigator: NavigationService, shareDownload: ShareDownloadService){
 	TopAppBar(
 		{ Text("${service.myTeam} - ${service.otherTeam}") },
 		navigationIcon = {
-			IconButton({ navController.navigateUp() }){
+			IconButton({ navigator.navigateUp() }){
 				Icon(Icons.Outlined.ArrowBack, "Arrow Back")
 			}
 		},
 		actions = {
 			if(service.done){
 				IconButton({
-					shareDownload.share(service.state)
+					shareDownload.share(service)
 				}){
 					Icon(Icons.Outlined.Share, "Share")
 				}
 				IconButton({
-					shareDownload.download(service.state)
+					shareDownload.download(service)
 				}){
 					Icon(Icons.Outlined.Download, "Download")
 				}
@@ -99,22 +99,19 @@ fun MatchFab(service: MatchService){
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun MatchScreen(navController: NavController, matchService: MatchService, current: Long, shareDownload: ShareDownloadService){
+fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareDownload: ShareDownloadService){
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
 	for (i in 1..matchService.myTeamSummary.size) {
 		anchors[i * -sizePx] = i
 	}
-	LaunchedEffect(current){
-		matchService.loadMatch(current)
-	}
 	val swipeState = rememberSwipeableState(1) {
 		matchService.quart = it
 		true
 	}
 	Scaffold(
-		topBar = { MatchAppBar(matchService, navController, shareDownload) },
+		topBar = { MatchAppBar(matchService, navigator, shareDownload) },
 		floatingActionButton = { MatchFab(matchService) },
 	) {
 		Column(Modifier.padding(it).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
@@ -156,7 +153,7 @@ fun FauteChange(service: MatchService){
 	var teamSelector: Boolean by remember { mutableStateOf(false) }
 	var playerSelector: Boolean by remember { mutableStateOf(false) }
 	Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-		Button({}){ Text("Faute") }
+		Button({ playerSelector = true }, enabled = service.start && !service.done){ Text("Faute") }
 		Button({ teamSelector = true }, enabled = service.start && !service.done){ Text("Changement") }
 		if(teamSelector){
 			TeamSelector(
@@ -183,7 +180,7 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 	Column(Modifier.weight(0.45f)) {
 		Text(name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
 		Text(summary.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
-		Text(summary[quart - 1].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
+		Text(summary[quart - 1].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primaryContainer, textAlign = TextAlign.Center)
 	}
 }
 
@@ -227,7 +224,7 @@ fun PlayerSelector(players: List<PlayerMatch>, onDismiss: () -> Unit, onSelect: 
 		LazyVerticalGrid(
 			GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8
 			.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-			items(players.filter { it.onMatch }){
+			items(players.filter { it.onMatch }.sortedBy { it.player.name }){
 				TextButton(
 					{
 						onSelect(it.player.name)
@@ -291,7 +288,7 @@ fun TeamSelector(onDismiss: () -> Unit, onConfirm: () -> Unit, onPlayerChange: (
 		title = { Text("Sélection Équipe") },
 		text = {
 			LazyColumn {
-				items(players){ p ->
+				items(players.sortedBy { it.player.name }){ p ->
 					Row(verticalAlignment = Alignment.CenterVertically) {
 						Checkbox(p.onMatch, { onPlayerChange(it, p) })
 						Text(p.player.name)

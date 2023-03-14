@@ -6,9 +6,13 @@ import fr.imacaron.robobrole.db.Type
 import fr.imacaron.robobrole.state.MatchState
 import fr.imacaron.robobrole.state.PlayerMatch
 import fr.imacaron.robobrole.state.Summary
+import fr.imacaron.robobrole.types.Gender
 import kotlinx.coroutines.*
+import java.time.LocalDate
 
-class MatchService(private val db: AppDatabase, val state: MatchState) {
+class MatchService(private val db: AppDatabase) {
+
+	val state = MatchState()
 
 	var myTeam: String
 		get() = state.myTeam
@@ -41,6 +45,15 @@ class MatchService(private val db: AppDatabase, val state: MatchState) {
 
 	val players: List<PlayerMatch>
 		get() = state.players
+
+	val matchName: String
+		get() = "${state.myTeam} - ${state.otherTeam} - ${state.level}${if(state.gender == Gender.Women) "F" else "M"}"
+
+	val events: List<Event>
+		get() = state.events
+
+	val date: LocalDate
+		get() = state.date
 
 
 	@OptIn(DelicateCoroutinesApi::class)
@@ -166,6 +179,16 @@ class MatchService(private val db: AppDatabase, val state: MatchState) {
 			if(it.type == Type.Point){
 				val sum = state.getSummary(it.team, it.quart)
 				sum[it.data.toInt()] = sum[it.data.toInt()] + 1
+			}
+		}
+	}
+
+	suspend fun cleanCurrent(){
+		withContext(Dispatchers.IO){
+			db.matchDao().getCurrent()?.let{ current ->
+				db.matchDao().deleteCurrent()
+				db.eventDAO().deleteMatch(current.uid)
+				db.matchPlayerDao().deleteMatchPlayer(current.uid)
 			}
 		}
 	}

@@ -30,15 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import fr.imacaron.robobrole.db.Player
+import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.TeamService
 import kotlinx.coroutines.*
 import java.lang.NumberFormatException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun TeamScreen(service: TeamService, navController: NavController){
+fun TeamScreen(service: TeamService, navigator: NavigationService){
 	var add: Boolean by remember { mutableStateOf(false) }
 	var edit: Player? by remember { mutableStateOf(null) }
 	var name: String by remember { mutableStateOf("") }
@@ -47,7 +47,7 @@ fun TeamScreen(service: TeamService, navController: NavController){
 		topBar = {
 			TopAppBar(
 				{ Text("Équipe" ) },
-				navigationIcon = { IconButton({ navController.navigateUp()} ){ Icon(Icons.Outlined.ArrowBack, "Back")} }
+				navigationIcon = { IconButton({ navigator.navigateUp()} ){ Icon(Icons.Outlined.ArrowBack, "Back")} }
 			)
 		}
 	){ p ->

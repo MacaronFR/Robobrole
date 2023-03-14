@@ -11,26 +11,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.FileProvider
-import androidx.navigation.NavType
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.room.Room
-import fr.imacaron.robobrole.components.AppBar
 import fr.imacaron.robobrole.db.AppDatabase
 import fr.imacaron.robobrole.drawer.*
 import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.home.TeamScreen
 import fr.imacaron.robobrole.match.MatchScreen
-import fr.imacaron.robobrole.match.NewNewMatchScreen
-import fr.imacaron.robobrole.service.MatchService
-import fr.imacaron.robobrole.service.NewMatchService
-import fr.imacaron.robobrole.service.ShareDownloadService
-import fr.imacaron.robobrole.service.TeamService
-import fr.imacaron.robobrole.state.MatchState
+import fr.imacaron.robobrole.match.NewMatchScreen
+import fr.imacaron.robobrole.service.*
 import fr.imacaron.robobrole.state.PrefState
-import fr.imacaron.robobrole.state.UIState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
 import kotlinx.coroutines.*
 
@@ -43,7 +36,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 
 	lateinit var db: AppDatabase
 
-	@OptIn(ExperimentalMaterial3Api::class)
+	@OptIn(DelicateCoroutinesApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		db = Room.databaseBuilder(
@@ -52,44 +45,38 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 			"match"
 		).fallbackToDestructiveMigration().build()
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
-		val matchState = MatchState()
 		val prefState = PrefState(sharedPref)
-		val uiState = UIState()
-		val matchService = MatchService(db, matchState)
+		val matchService = MatchService(db)
 		val newMatchService = NewMatchService(db, prefState.team)
 		val teamService = TeamService(db, prefState)
+		val homeService = HomeService(db)
+		GlobalScope.launch {
+			homeService.loadHistory()
+		}
 		setContent {
 			val navController = rememberNavController()
+			val navigator = NavigationService(navController, matchService, newMatchService, teamService, homeService)
 			RobobroleTheme(darkTheme = prefState.theme) {
 				NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize()){
-					composable("home"){
-						Scaffold(
-							topBar = { AppBar(prefState, db, navController, uiState, matchState) },
-							bottomBar = { Navigation(navController, db, uiState, matchState) }
-						) {
-							Box(Modifier.fillMaxSize().padding(it)){
-								HomeScreen(navController, db, uiState)
-							}
-						}
-					}
-					composable("match/{current}", arguments = listOf(navArgument("current"){ type = NavType.LongType })) { entries -> MatchScreen(navController, matchService, entries.arguments!!.getLong("current"), this@MainActivity) }
-					composable("new_match") { NewNewMatchScreen(newMatchService, navController) }
-					composable("team") { TeamScreen(teamService, navController) }
+					composable("home"){ HomeScreen(navigator, homeService) }
+					composable("match") { MatchScreen(navigator, matchService, this@MainActivity) }
+					composable("new_match") { NewMatchScreen(newMatchService, navigator) }
+					composable("team") { TeamScreen(teamService, navigator) }
 				}
 			}
 		}
 	}
 
 	@OptIn(DelicateCoroutinesApi::class)
-	override fun share(matchState: MatchState){
+	override fun share(service: MatchService){
 		GlobalScope.launch(Dispatchers.IO){
-			val data = getCsv(matchState)
+			val data = getCsv(service)
 			filesDir.resolve("match").apply {
 				if(!exists()){
 					mkdir()
 				}
 			}
-			val f = File(filesDir, "match/match.csv")
+			val f = File(filesDir, "match/${service.matchName}")
 			val out = FileOutputStream(f)
 			out.write(data.toByteArray())
 			out.close()
@@ -103,10 +90,10 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		}
 	}
 
-	override fun download(matchState: MatchState){
-		val data = getCsv(matchState)
+	override fun download(service: MatchService){
+		val data = getCsv(service)
 		val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-		val initName = "${matchState.myTeam}-${matchState.otherTeam}-${matchState.level}-${matchState.gender.value}-${matchState.date.dayOfMonth}-${matchState.date.monthValue}-${matchState.date.year}"
+		val initName = "${service.matchName}-${service.date.dayOfMonth}-${service.date.monthValue}-${service.date.year}"
 		var name = "$initName.csv"
 		var index = 0
 		val fileNames = dir.listFiles()?.map { it.name } ?: listOf()
@@ -135,10 +122,6 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 				e.printStackTrace()
 			}
 		}
-	}
-
-	fun removeAllSave(){
-		filesDir.listFiles()?.forEach { it.delete() }
 	}
 
 }

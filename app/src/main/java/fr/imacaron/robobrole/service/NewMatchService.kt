@@ -67,12 +67,13 @@ class NewMatchService(private val db: AppDatabase, val myTeam: String) {
 
 	suspend fun createMatch(): Long = withContext(Dispatchers.IO){
 		val match = db.matchDao().insertInfo(Match(myTeam, state.otherTeam, state.level, if(state.women) Gender.Women else Gender.Men))
+		createPlayer(match)
 		state.clear()
 		ui.clear()
 		match
 	}
 
-	suspend fun createPlayer(match: Long){
+	private suspend fun createPlayer(match: Long){
 		withContext(Dispatchers.IO){
 			val players = state.players.filter { it.value }.map { MatchPlayer(it.key, match) }
 			db.matchPlayerDao().insertAll(players)
@@ -81,9 +82,8 @@ class NewMatchService(private val db: AppDatabase, val myTeam: String) {
 
 	suspend fun loadPlayers(){
 		withContext(Dispatchers.IO){
-			println("ICI")
 			db.playerDao().getAll().forEach {
-				state.players[it] = false
+				state.players[it] = state.players[it] ?: false
 			}
 		}
 	}

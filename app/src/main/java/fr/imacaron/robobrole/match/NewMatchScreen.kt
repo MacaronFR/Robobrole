@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.NewMatchService
 import kotlinx.coroutines.*
 
@@ -25,24 +25,21 @@ val defaultModifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewMatchBar(navController: NavController){
+fun NewMatchBar(navigator: NavigationService){
 	TopAppBar(
 		{ Text("Nouveau match") },
-		navigationIcon = { IconButton({ navController.navigateUp() }){ Icon(Icons.Outlined.ArrowBack, "Back") } },
+		navigationIcon = { IconButton({ navigator.navigateUp() }){ Icon(Icons.Outlined.ArrowBack, "Back") } },
 		actions = {
-			IconButton({ navController.navigate("team") }){ Icon(Icons.Outlined.Groups, "Team") }
+			IconButton({ navigator.navigateTeam() }){ Icon(Icons.Outlined.Groups, "Team") }
 		}
 	)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
-fun NewNewMatchScreen(service: NewMatchService, navController: NavController){
-	LaunchedEffect(Unit){
-		service.loadPlayers()
-	}
+fun NewMatchScreen(service: NewMatchService, navigator: NavigationService){
 	Scaffold(
-		topBar = { NewMatchBar(navController) }
+		topBar = { NewMatchBar(navigator) }
 	) { p ->
 		Column(Modifier.padding(p), horizontalAlignment = Alignment.CenterHorizontally) {
 			MatchInfo(service)
@@ -52,9 +49,8 @@ fun NewNewMatchScreen(service: NewMatchService, navController: NavController){
 					if(service.isValid) {
 						GlobalScope.launch {
 							val match = service.createMatch()
-							service.createPlayer(match)
 							withContext(Dispatchers.Main){
-								navController.navigate("match/$match"){ popUpTo("home") }
+								navigator.navigateMatch(match)
 							}
 						}
 					}
@@ -125,7 +121,10 @@ fun PlayerSelection(service: NewMatchService){
 		Text("Équipe", Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp), style = MaterialTheme.typography.headlineSmall)
 		FlowRow(Modifier.fillMaxWidth().padding(8.dp, 0.dp), mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
 			service.players.forEach { (player, isPresent) ->
-				FilterChip(isPresent, { service.players[player] = !isPresent }, { Text(player.name) } )
+				FilterChip(isPresent, {
+					service.players[player] = !isPresent
+					println(service.players.size)
+									  }, { Text(player.name) } )
 			}
 		}
 		if(service.teamError){

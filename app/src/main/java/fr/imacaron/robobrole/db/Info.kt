@@ -57,4 +57,7 @@ interface MatchDAO {
 
 	@Query("SELECT * FROM match WHERE uid = :id")
 	fun get(id: Long): Match
+
+	@Query("DELETE FROM match WHERE uid = :id")
+	fun delete(id: Long)
 }
