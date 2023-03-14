@@ -139,12 +139,14 @@ fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareD
 
 @Composable
 fun MatchBoard(service: MatchService){
-	Row(verticalAlignment = Alignment.CenterVertically) {
-		TeamInfo(service.myTeam, service.myTeamSummary, service.quart)
-		Column(Modifier.weight(0.10f)) {
-			Text("Q${service.quart}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
+	ElevatedCard(Modifier.padding(8.dp)) {
+		Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+			TeamInfo(service.myTeam, service.myTeamSummary, service.quart)
+			Column(Modifier.weight(0.10f)) {
+				Text("Q${service.quart}", Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.headlineMedium)
+			}
+			TeamInfo(service.otherTeam, service.otherTeamSummary, service.quart)
 		}
-		TeamInfo(service.otherTeam, service.otherTeamSummary, service.quart)
 	}
 }
 
@@ -180,7 +182,7 @@ fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 	Column(Modifier.weight(0.45f)) {
 		Text(name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
 		Text(summary.total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center)
-		Text(summary[quart - 1].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primaryContainer, textAlign = TextAlign.Center)
+		Text(summary[quart - 1].total().toString(), Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), textAlign = TextAlign.Center)
 	}
 }
 
