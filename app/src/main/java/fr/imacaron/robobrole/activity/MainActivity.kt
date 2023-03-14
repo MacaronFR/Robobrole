@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		}
 		setContent {
 			val navController = rememberNavController()
-			val navigator = NavigationService(navController, matchService, newMatchService, teamService, homeService)
+			val navigator = NavigationService(navController, matchService, newMatchService, homeService)
 			RobobroleTheme(darkTheme = prefState.theme) {
 				NavHost(navController, startDestination = "home", modifier = Modifier.fillMaxSize()){
 					composable("home"){ HomeScreen(navigator, homeService) }

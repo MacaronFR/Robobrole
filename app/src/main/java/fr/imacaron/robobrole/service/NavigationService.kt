@@ -9,17 +9,8 @@ class NavigationService(
 	private val navController: NavController,
 	private val matchService: MatchService,
 	private val newMatchService: NewMatchService,
-	private val teamService: TeamService,
 	private val homeService: HomeService
 ) {
-	@OptIn(DelicateCoroutinesApi::class)
-	fun navigateHome(){
-		homeService.cleanHistory()
-		GlobalScope.launch{
-			homeService.loadHistory()
-		}
-		navController.navigate("home")
-	}
 
 	fun navigateTeam(){
 		navController.navigate("team")
