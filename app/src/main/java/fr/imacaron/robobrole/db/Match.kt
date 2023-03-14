@@ -35,7 +35,7 @@ class LocalDateConverters {
 interface MatchDAO {
 
 	@Insert
-	fun insertInfo(match: Match): Long
+	fun insertMatch(match: Match): Long
 
 	@Query("UPDATE match SET done = true WHERE uid = :id")
 	fun setDone(id: Long)
@@ -53,7 +53,7 @@ interface MatchDAO {
 	fun getSaved(): List<Match>
 
 	@Query("DELETE FROM match")
-	fun removeAll()
+	fun deleteAll()
 
 	@Query("SELECT * FROM match WHERE uid = :id")
 	fun get(id: Long): Match

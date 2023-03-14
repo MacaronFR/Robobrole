@@ -56,7 +56,7 @@ interface EventDAO {
 	fun deleteEvent(id: Long)
 
 	@Query("DELETE FROM event")
-	fun wipeTable()
+	fun deleteAll()
 
 	@Query("DELETE FROM event WHERE match = :match")
 	fun deleteMatch(match: Long)

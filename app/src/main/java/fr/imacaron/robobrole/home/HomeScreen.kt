@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package fr.imacaron.robobrole.home
 
 import android.view.MotionEvent
@@ -15,10 +17,7 @@ import androidx.compose.material.DismissDirection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -42,9 +41,14 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeBar(){
+fun HomeBar(navigator: NavigationService){
 	TopAppBar(
-		{ Text("Robobrole") }
+		{ Text("Robobrole") },
+		actions = {
+			IconButton({ navigator.navigateSettings() }){
+				Icon(Icons.Outlined.Settings, "Settings")
+			}
+		}
 	)
 }
 
@@ -99,7 +103,7 @@ fun HomeNav(navigator: NavigationService, homeService: HomeService){
 @Composable
 fun HomeScreen(navigator: NavigationService, service: HomeService){
 	Scaffold(
-		topBar = { HomeBar() },
+		topBar = { HomeBar(navigator) },
 		bottomBar = { HomeNav(navigator, service) }
 	) {
 		Column(Modifier.padding(it)) {

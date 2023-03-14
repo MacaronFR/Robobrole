@@ -29,5 +29,5 @@ interface PlayerDao {
 	fun delete(player: Player)
 
 	@Query("DELETE FROM player")
-	fun wipeTable()
+	fun deleteAll()
 }

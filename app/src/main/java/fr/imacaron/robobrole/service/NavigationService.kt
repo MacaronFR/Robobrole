@@ -42,4 +42,8 @@ class NavigationService(
 		}
 		navController.navigateUp()
 	}
+
+	fun navigateSettings(){
+		navController.navigate("settings")
+	}
 }

@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package fr.imacaron.robobrole.match
 
 import androidx.compose.foundation.clickable

@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package fr.imacaron.robobrole.home
 
 import androidx.compose.animation.core.animateFloatAsState

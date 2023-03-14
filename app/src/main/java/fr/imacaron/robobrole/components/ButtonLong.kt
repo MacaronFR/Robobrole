@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package fr.imacaron.robobrole.components
 
 import androidx.compose.foundation.BorderStroke
