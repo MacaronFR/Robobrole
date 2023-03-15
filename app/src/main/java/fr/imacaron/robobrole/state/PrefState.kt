@@ -51,4 +51,10 @@ class PrefState(private val sharedPref: SharedPreferences) {
 			}
 		}
 	}
+
+	fun reset(){
+		theme = Theme.Default
+		team = ""
+		sharedPref.edit().clear().apply()
+	}
 }

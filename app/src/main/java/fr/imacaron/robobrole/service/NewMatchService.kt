@@ -8,11 +8,12 @@ import fr.imacaron.robobrole.db.MatchPlayer
 import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.state.NewMatchState
 import fr.imacaron.robobrole.state.NewMatchUIState
+import fr.imacaron.robobrole.state.PrefState
 import fr.imacaron.robobrole.types.Gender
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class NewMatchService(private val db: AppDatabase, val myTeam: String) {
+class NewMatchService(private val db: AppDatabase, private val prefState: PrefState) {
 
 	private val state by mutableStateOf(NewMatchState())
 
@@ -64,6 +65,9 @@ class NewMatchService(private val db: AppDatabase, val myTeam: String) {
 			}
 			return ok
 		}
+
+	val myTeam: String
+		get() = prefState.team
 
 	suspend fun createMatch(): Long = withContext(Dispatchers.IO){
 		val match = db.matchDao().insertMatch(Match(myTeam, state.otherTeam, state.level, if(state.women) Gender.Women else Gender.Men))

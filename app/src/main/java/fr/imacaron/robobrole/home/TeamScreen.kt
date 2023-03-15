@@ -2,6 +2,7 @@
 
 package fr.imacaron.robobrole.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,7 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 	var edit: Player? by remember { mutableStateOf(null) }
 	var name: String by remember { mutableStateOf("") }
 	var number: Int? by remember { mutableStateOf(null) }
+	BackHandler { navigator.navigateUp() }
 	Scaffold(
 		topBar = {
 			TopAppBar(

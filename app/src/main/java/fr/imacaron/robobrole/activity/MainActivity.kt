@@ -22,7 +22,7 @@ import fr.imacaron.robobrole.home.HomeScreen
 import fr.imacaron.robobrole.home.TeamScreen
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
-import fr.imacaron.robobrole.match.SettingScreen
+import fr.imacaron.robobrole.home.SettingScreen
 import fr.imacaron.robobrole.service.*
 import fr.imacaron.robobrole.state.PrefState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		val sharedPref = getSharedPreferences("fr.imacaron.robobrole.settings", Context.MODE_PRIVATE)
 		val prefState = PrefState(sharedPref)
 		val matchService = MatchService(db)
-		val newMatchService = NewMatchService(db, prefState.team)
+		val newMatchService = NewMatchService(db, prefState)
 		val teamService = TeamService(db, prefState)
 		val homeService = HomeService(db)
 		val settingService = SettingService(db, prefState)
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 					composable("match") { MatchScreen(navigator, matchService, this@MainActivity) }
 					composable("new_match") { NewMatchScreen(newMatchService, navigator) }
 					composable("team") { TeamScreen(teamService, navigator) }
-					composable("settings") { SettingScreen(settingService) }
+					composable("settings") { SettingScreen(settingService, navigator) }
 				}
 			}
 		}

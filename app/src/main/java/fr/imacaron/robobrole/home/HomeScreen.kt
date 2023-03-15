@@ -4,6 +4,7 @@ package fr.imacaron.robobrole.home
 
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -87,9 +88,10 @@ fun HomeNav(navigator: NavigationService, homeService: HomeService){
 				}
 			}
 		)
+		val color = if(current == null) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurfaceVariant
 		NavigationBarItem(
-			icon = { Icon(Icons.Outlined.PlayArrow, null) },
-			label = { Text("Continuer") },
+			icon = { Icon(Icons.Outlined.PlayArrow, null, tint = color) },
+			label = { Text("Continuer", color = color) },
 			selected = false,
 			onClick = {
 				navigator.navigateMatch(current ?: -1)
@@ -102,6 +104,7 @@ fun HomeNav(navigator: NavigationService, homeService: HomeService){
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navigator: NavigationService, service: HomeService){
+	BackHandler { navigator.navigateUp() }
 	Scaffold(
 		topBar = { HomeBar(navigator) },
 		bottomBar = { HomeNav(navigator, service) }

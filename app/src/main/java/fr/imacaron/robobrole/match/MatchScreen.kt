@@ -3,6 +3,7 @@
 package fr.imacaron.robobrole.match
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
@@ -105,6 +106,7 @@ fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareD
 	val size = LocalConfiguration.current.screenWidthDp
 	val sizePx = with(LocalDensity.current) { size.dp.toPx() }
 	val anchors = mutableMapOf<Float, Int>()
+	BackHandler { navigator.navigateUp() }
 	for (i in 1..matchService.myTeamSummary.size) {
 		anchors[i * -sizePx] = i
 	}

@@ -2,6 +2,7 @@
 
 package fr.imacaron.robobrole.match
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ fun NewMatchBar(navigator: NavigationService){
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun NewMatchScreen(service: NewMatchService, navigator: NavigationService){
+	BackHandler { navigator.navigateUp() }
 	Scaffold(
 		topBar = { NewMatchBar(navigator) }
 	) { p ->
