@@ -135,34 +135,7 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 			}
 		}
 	}
-	if(add){
-		AlertDialog(
-			onDismissRequest = {
-				add = false
-			},
-			confirmButton = {
-				TextButton({
-					GlobalScope.launch{
-						if(number != null && name != ""){
-							service.createPlayer(Player(name, number!!))
-							withContext(Dispatchers.Main){
-								add = false
-								name = ""
-								number = null
-							}
-						}
-					}
-				} ){ Text("Ajouter") }
-			},
-			title = { Text("Ajouter un joueur") },
-			text = {
-				Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-					OutlinedTextField(name, { name = it }, label = { Text("Nom") }, isError = name == "")
-					OutlinedTextField(number?.toString() ?: "", { number = try { it.toInt() } catch (_: NumberFormatException) { null } }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), label = { Text("Numéro") }, isError = number == null)
-				}
-			}
-		)
-	}
+	TeamScreenDialog(add, { add = false}, service)
 	if(edit != null){
 		AlertDialog(
 			{
