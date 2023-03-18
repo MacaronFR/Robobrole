@@ -37,6 +37,8 @@ class MatchState {
 
 	var quart: Int by mutableStateOf(1)
 
+	var quartStart: Long by mutableStateOf(0L)
+
 	var level: String by mutableStateOf("")
 
 	var myTeam: String by mutableStateOf("")

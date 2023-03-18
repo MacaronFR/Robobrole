@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -31,13 +30,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.TeamService
 import kotlinx.coroutines.*
-import java.lang.NumberFormatException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
@@ -45,7 +42,6 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 	var add: Boolean by remember { mutableStateOf(false) }
 	var edit: Player? by remember { mutableStateOf(null) }
 	var name: String by remember { mutableStateOf("") }
-	var number: Int? by remember { mutableStateOf(null) }
 	BackHandler { navigator.navigateUp() }
 	Scaffold(
 		topBar = {
@@ -106,13 +102,11 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 								) {
 									Column{
 										Text(player.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
-										Text(player.number.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
 									}
 									Spacer(Modifier.weight(1f))
 									IconButton({
 										edit = player
 										name = player.name
-										number = player.number
 									}, Modifier.size(24.dp)) {
 										Icon(Icons.Outlined.Edit, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
 									}
@@ -141,16 +135,14 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 			{
 				edit = null
 				name = ""
-				number = null
 			},
 			{
 				TextButton({
 					GlobalScope.launch(Dispatchers.IO){
-						if(number != null && edit != null && name != ""){
-							service.updatePlayer(Player(edit!!.id, name, number!!))
+						if(edit != null && name != ""){
+							service.updatePlayer(Player(edit!!.id, name))
 							edit = null
 							name = ""
-							number = null
 						}
 					}
 				}){
@@ -161,7 +153,6 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 			text = {
 				Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 					OutlinedTextField(name, { name = it }, label = { Text("Nom") }, isError = name == "")
-					OutlinedTextField(number?.toString() ?: "", { number = try { it.toInt() } catch (_: NumberFormatException) { null } }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), label = { Text("Numéro") }, isError = number == null)
 				}
 			}
 		)

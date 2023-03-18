@@ -43,6 +43,9 @@ class MatchService(private val db: AppDatabase) {
 	val start: Boolean
 		get() = state.startAt != 0L
 
+	val quartStart: Long
+		get() = state.quartStart
+
 	val players: List<PlayerMatch>
 		get() = state.players
 
@@ -125,6 +128,7 @@ class MatchService(private val db: AppDatabase) {
 		}
 		state.startAt = at
 		GlobalScope.launch(Dispatchers.IO){
+			setQuartStart(1, at)
 			db.matchDao().setStart(state.startAt, state.current)
 		}
 	}
@@ -179,6 +183,8 @@ class MatchService(private val db: AppDatabase) {
 			if(it.type == Type.Point){
 				val sum = state.getSummary(it.team, it.quart)
 				sum[it.data.toInt()] = sum[it.data.toInt()] + 1
+			} else if(it.type == Type.Start){
+				state.quartStart = it.time
 			}
 		}
 	}
@@ -190,6 +196,17 @@ class MatchService(private val db: AppDatabase) {
 				db.eventDAO().deleteMatch(current.uid)
 				db.matchPlayerDao().deleteMatchPlayer(current.uid)
 			}
+		}
+	}
+
+	fun addMinuteToCurrent(min: Int){
+		state.quartStart += min * 60
+	}
+
+	suspend fun setQuartStart(quart: Int, at: Long){
+		state.quartStart = at
+		withContext(Dispatchers.IO){
+			db.eventDAO().insertEvent(Event(Type.Start, "", "", "", at, quart, state.current))
 		}
 	}
 }

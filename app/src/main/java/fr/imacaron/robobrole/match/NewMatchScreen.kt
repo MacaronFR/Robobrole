@@ -125,10 +125,7 @@ fun PlayerSelection(service: NewMatchService){
 		Text("Équipe", Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp), style = MaterialTheme.typography.headlineSmall)
 		FlowRow(Modifier.fillMaxWidth().padding(8.dp, 0.dp), mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
 			service.players.forEach { (player, isPresent) ->
-				FilterChip(isPresent, {
-					service.players[player] = !isPresent
-					println(service.players.size)
-									  }, { Text(player.name) } )
+				FilterChip(isPresent, { service.players[player] = !isPresent }, { Text(player.name) } )
 			}
 		}
 		if(service.teamError){

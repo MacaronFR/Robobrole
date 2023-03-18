@@ -5,10 +5,9 @@ import androidx.room.*
 @Entity(tableName = "player")
 data class Player(
 	@PrimaryKey(true) var id: Long,
-	@ColumnInfo(name = "name") val name: String,
-	@ColumnInfo(name = "numero") val number: Int
+	@ColumnInfo(name = "name") val name: String
 ){
-	constructor(name: String, number: Int): this(0, name, number)
+	constructor(name: String): this(0, name)
 }
 
 @Dao

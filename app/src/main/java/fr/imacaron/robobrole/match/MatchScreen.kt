@@ -100,7 +100,7 @@ fun MatchFab(service: MatchService){
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareDownload: ShareDownloadService){
 	val size = LocalConfiguration.current.screenWidthDp
@@ -112,6 +112,11 @@ fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareD
 	}
 	val swipeState = rememberSwipeableState(1) {
 		matchService.quart = it
+		GlobalScope.launch {
+			if(!matchService.done && matchService.start){
+				matchService.setQuartStart(it, System.currentTimeMillis() / 1000)
+			}
+		}
 		true
 	}
 	Scaffold(
@@ -182,6 +187,32 @@ fun FauteChange(service: MatchService){
 }
 
 @Composable
+fun TimeDialog(onDismiss: () -> Unit, quart: Int, onContinue: () -> Unit, addTime: (Int) -> Unit){
+	AlertDialog(
+		onDismiss,
+		{
+			Button(onDismiss) { Text("Non") }
+		},
+		title = { Text("Quart temps") },
+		text = {
+			Column {
+				Text("Êtes vous sûr que vous êtes au quart temps $quart")
+				Button({
+					onDismiss()
+					onContinue()
+					addTime(2)
+				}) { Text("+2 minutes") }
+				Button({
+					onDismiss()
+					onContinue()
+					addTime(5)
+				}) { Text("+5 minutes") }
+			}
+		}
+	)
+}
+
+@Composable
 fun RowScope.TeamInfo(name: String, summary: List<Summary>, quart: Int){
 	Column(Modifier.weight(0.45f)) {
 		Text(name, Modifier.fillMaxWidth(), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
@@ -202,14 +233,31 @@ fun Teams(service: MatchService, quart: Int){
 @Composable
 fun MyTeam(service: MatchService, quart: Int){
 	var displaySelector: Boolean by remember { mutableStateOf(false) }
+	var displayTime: Boolean by remember { mutableStateOf(false) }
 	var amount: Int by remember { mutableStateOf(1) }
 	val team = service.myTeam
 	val summary = service.myTeamSummary[quart-1]
 	Column {
 		Row(Modifier.fillMaxWidth().padding(16.dp, 16.dp), horizontalArrangement = Arrangement.SpaceAround){
-			PointButton({ displaySelector = true; amount = 1 }, { service.removePoint(1, team) }, service.start && !service.done, "1"){ Text(summary.one.toString()) }
-			PointButton({ displaySelector = true; amount = 2 }, { service.removePoint(2, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
-			PointButton({ displaySelector = true; amount = 3 }, { service.removePoint(3, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
+			for( i in 1..3){
+				PointButton(
+					{
+						amount = i
+						if((System.currentTimeMillis() / 1000 - service.quartStart) / 60 >= 15){
+							displayTime = true
+						} else {
+							displaySelector = true
+						}
+					},
+					{
+						service.removePoint(amount, team)
+					},
+					service.start && !service.done,
+					amount.toString()
+				){
+					Text(summary[i].toString())
+				}
+			}
 		}
 		QuartTeamPoint(quart, team, summary)
 	}
@@ -217,6 +265,9 @@ fun MyTeam(service: MatchService, quart: Int){
 		PlayerSelector(service.players, { displaySelector = false }){
 			service.addPoint(amount, team, it)
 		}
+	}
+	if(displayTime) {
+		TimeDialog({ displayTime = false }, quart, { displaySelector = true }, service::addMinuteToCurrent)
 	}
 }
 
