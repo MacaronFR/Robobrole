@@ -255,7 +255,7 @@ fun MyTeam(service: MatchService, quart: Int){
 						service.removePoint(amount, team)
 					},
 					service.start && !service.done,
-					amount.toString()
+					i.toString()
 				){
 					Text(summary[i].toString())
 				}
@@ -322,7 +322,7 @@ fun PointButton(onClick: () -> Unit, onLongClick: () -> Unit, enabled: Boolean, 
 		MaterialTheme.colorScheme.onSecondaryContainer to MaterialTheme.colorScheme.secondaryContainer
 	else
 		MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) to MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-	BadgedBox( { Badge(Modifier.offset((-8).dp, 7.dp)) { Text(badgeText, style = MaterialTheme.typography.titleSmall) } } ){
+	BadgedBox( { Badge(Modifier.offset((-8).dp, 7.dp), MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary) { Text(badgeText, style = MaterialTheme.typography.titleSmall) } } ){
 		ButtonLong(onClick, onLongClick, enabled = enabled, shape = MaterialTheme.shapes.large, contentColor = contentColor, containerColor = containerColor, content = content)
 	}
 }
