@@ -122,7 +122,7 @@ fun MatchInfo(service: NewMatchService){
 @Composable
 fun PlayerSelection(service: NewMatchService){
 	Column(Modifier.fillMaxWidth().padding(16.dp, 0.dp)) {
-		Text("Équipe", Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp), style = MaterialTheme.typography.headlineSmall)
+		Text("Équipe ${service.players.filter { it.value }.size.let { if(it > 0) "($it)" else "" }}", Modifier.padding(8.dp, 8.dp, 8.dp, 0.dp), style = MaterialTheme.typography.headlineSmall)
 		FlowRow(Modifier.fillMaxWidth().padding(8.dp, 0.dp), mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
 			service.players.forEach { (player, isPresent) ->
 				FilterChip(isPresent, { service.players[player] = !isPresent }, { Text(player.name) } )

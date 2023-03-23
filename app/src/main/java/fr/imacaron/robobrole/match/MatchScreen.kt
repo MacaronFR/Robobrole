@@ -8,9 +8,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -274,9 +271,8 @@ fun MyTeam(service: MatchService, quart: Int){
 @Composable
 fun PlayerSelector(players: List<PlayerMatch>, onDismiss: () -> Unit, onSelect: (player: String) -> Unit){
 	AlertDialog(onDismiss, {}, title = { Text("Joueuse") }, text = {
-		LazyVerticalGrid(
-			GridCells.Fixed(2), Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8
-			.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+		LazyColumn (
+			Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally , verticalArrangement = Arrangement.spacedBy(4.dp)) {
 			items(players.filter { it.onMatch }.sortedBy { it.player.name }){
 				TextButton(
 					{
@@ -343,7 +339,7 @@ fun TeamSelector(onDismiss: () -> Unit, onConfirm: () -> Unit, onPlayerChange: (
 			Icon(Icons.Outlined.Check, null)
 			Text("Valider")
 		} },
-		title = { Text("Sélection Équipe") },
+		title = { Text("Sélection Équipe ${players.count { it.onMatch }.let { if(it > 0) "($it)" else "" }}") },
 		text = {
 			LazyColumn {
 				items(players.sortedBy { it.player.name }){ p ->

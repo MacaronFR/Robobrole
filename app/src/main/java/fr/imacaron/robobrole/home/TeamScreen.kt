@@ -42,7 +42,7 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 	var add: Boolean by remember { mutableStateOf(false) }
 	var edit: Player? by remember { mutableStateOf(null) }
 	var name: String by remember { mutableStateOf("") }
-	BackHandler { navigator.navigateUp() }
+	BackHandler(true) { navigator.navigateUp() }
 	Scaffold(
 		topBar = {
 			TopAppBar(
