@@ -46,4 +46,10 @@ class NavigationService(
 	fun navigateSettings(){
 		navController.navigate("settings")
 	}
+
+	fun navigateStat(){
+		if(navController.currentDestination?.route == "match"){
+			navController.navigate("stat")
+		}
+	}
 }

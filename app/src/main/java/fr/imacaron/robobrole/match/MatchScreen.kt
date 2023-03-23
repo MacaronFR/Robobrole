@@ -122,6 +122,11 @@ fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareD
 	) {
 		Column(Modifier.padding(it).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
 			MatchBoard(matchService)
+			Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+				Button({ navigator.navigateStat() }){
+					Text("Stat en direct")
+				}
+			}
 			FauteChange(matchService)
 			Box(
 				Modifier.padding(0.dp, 8.dp).width(size.dp).swipeable(

@@ -23,6 +23,7 @@ import fr.imacaron.robobrole.home.TeamScreen
 import fr.imacaron.robobrole.match.MatchScreen
 import fr.imacaron.robobrole.match.NewMatchScreen
 import fr.imacaron.robobrole.home.SettingScreen
+import fr.imacaron.robobrole.match.stat.StatScreen
 import fr.imacaron.robobrole.service.*
 import fr.imacaron.robobrole.state.PrefState
 import fr.imacaron.robobrole.ui.theme.RobobroleTheme
@@ -65,6 +66,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 					composable("new_match") { NewMatchScreen(newMatchService, navigator) }
 					composable("team") { TeamScreen(teamService, navigator) }
 					composable("settings") { SettingScreen(settingService, navigator) }
+					composable("stat"){ StatScreen(matchService, navigator) }
 				}
 			}
 		}
