@@ -76,15 +76,6 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun RobobroleTheme(darkTheme: Theme = Theme.Default, content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
-    val colors2 = if (darkTheme == Theme.Dark) {
-        dynamicDarkColorScheme(LocalContext.current)
-    } else if(darkTheme == Theme.Light){
-        dynamicLightColorScheme(LocalContext.current)
-    } else if(isSystemInDarkTheme()){
-        dynamicDarkColorScheme(LocalContext.current)
-    }else {
-        dynamicLightColorScheme(LocalContext.current)
-    }
     val colors = if (darkTheme == Theme.Dark) {
         DarkColors
     } else if(darkTheme == Theme.Light){
