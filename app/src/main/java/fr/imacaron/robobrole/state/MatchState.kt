@@ -9,7 +9,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class PlayerMatch(private val db: AppDatabase, player: Player, onMatch: Boolean){
+class PlayerMatch(private val db: AppDatabase, private val match: Long, player: Player, onMatch: Boolean){
 	var onMatch: Boolean by mutableStateOf(onMatch)
 		private set
 
@@ -17,7 +17,7 @@ class PlayerMatch(private val db: AppDatabase, player: Player, onMatch: Boolean)
 	infix fun onMatch(isPresent: Boolean){
 		onMatch = isPresent
 		GlobalScope.launch(Dispatchers.IO){
-			db.matchPlayerDao().setPresent(isPresent, player.id)
+			db.matchPlayerDao().setPresent(isPresent, player.id, match)
 		}
 	}
 

@@ -173,7 +173,7 @@ class MatchService(private val db: AppDatabase) {
 	private fun loadTeam(){
 		val players = db.matchPlayerDao().getByMatch(state.current).map {
 			val p = db.playerDao().get(it.player) ?: throw IllegalArgumentException()
-			PlayerMatch(db, p, it.inMatch)
+			PlayerMatch(db, state.current, p, it.inMatch)
 		}
 		state.players.addAll(players)
 	}
