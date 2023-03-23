@@ -41,6 +41,8 @@ class HomeService(private val db: AppDatabase) {
 		state.currents.removeIf { it.uid == id }
 		GlobalScope.launch(Dispatchers.IO){
 			db.matchDao().delete(id)
+			db.eventDAO().deleteMatch(id)
+			db.matchPlayerDao().deleteMatchPlayer(id)
 		}
 	}
 }

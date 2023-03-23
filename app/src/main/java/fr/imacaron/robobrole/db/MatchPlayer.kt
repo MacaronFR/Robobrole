@@ -14,17 +14,9 @@ data class MatchPlayer(
 
 @Dao
 interface MatchPlayerDao {
-	@Insert
-	fun insertPlayer(matchPlayer: MatchPlayer)
 
 	@Insert
 	fun insertAll(matchPlayers: List<MatchPlayer>)
-
-	@Delete
-	fun delete(matchPlayer: MatchPlayer)
-
-	@Query("SELECT * FROM match_player")
-	fun getAll(): List<MatchPlayer>
 
 	@Query("SELECT * FROM match_player WHERE match = :match")
 	fun getByMatch(match: Long): List<MatchPlayer>
