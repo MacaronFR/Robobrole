@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity(), ShareDownloadService {
 		val settingService = SettingService(db, prefState)
 		GlobalScope.launch {
 			homeService.loadHistory()
+			homeService.loadCurrent()
 		}
 		setContent {
 			val navController = rememberNavController()

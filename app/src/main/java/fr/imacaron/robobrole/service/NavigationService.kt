@@ -19,7 +19,6 @@ class NavigationService(
 	@OptIn(DelicateCoroutinesApi::class)
 	fun navigateNewMatch(){
 		GlobalScope.launch{
-			matchService.cleanCurrent()
 			newMatchService.loadPlayers()
 		}
 		navController.navigate("new_match")
@@ -36,9 +35,11 @@ class NavigationService(
 	@OptIn(DelicateCoroutinesApi::class)
 	fun navigateUp(){
 		homeService.cleanHistory()
+		homeService.cleanCurrents()
 		GlobalScope.launch{
 			newMatchService.loadPlayers()
 			homeService.loadHistory()
+			homeService.loadCurrent()
 		}
 		navController.navigateUp()
 	}

@@ -3,7 +3,6 @@
 package fr.imacaron.robobrole.home
 
 import android.view.MotionEvent
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -31,14 +30,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import fr.imacaron.robobrole.db.Match
 import fr.imacaron.robobrole.service.HomeService
 import fr.imacaron.robobrole.service.NavigationService
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,15 +48,8 @@ fun HomeBar(navigator: NavigationService){
 	)
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun HomeNav(navigator: NavigationService, homeService: HomeService){
-	var current: Long? by remember { mutableStateOf(null) }
-	var confirm: Boolean by remember { mutableStateOf(false) }
-	val context = LocalContext.current
-	LaunchedEffect(homeService){
-		current = homeService.currentMatch()
-	}
+fun HomeNav(navigator: NavigationService){
 	NavigationBar {
 		NavigationBarItem(
 			icon = { Icon(Icons.Outlined.Groups, null) },
@@ -76,27 +64,8 @@ fun HomeNav(navigator: NavigationService, homeService: HomeService){
 			label = { Text("Nouveau") },
 			selected = false,
 			onClick = {
-				if(confirm || current == null){
-					navigator.navigateNewMatch()
-				}else{
-					confirm = true
-					GlobalScope.launch {
-						delay(5000)
-						confirm = false
-					}
-					Toast.makeText(context, "Un match est en cours. Appuyer à nouveau pour l'écraser", Toast.LENGTH_LONG).show()
-				}
+				navigator.navigateNewMatch()
 			}
-		)
-		val color = if(current == null) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) else MaterialTheme.colorScheme.onSurfaceVariant
-		NavigationBarItem(
-			icon = { Icon(Icons.Outlined.PlayArrow, null, tint = color) },
-			label = { Text("Continuer", color = color) },
-			selected = false,
-			onClick = {
-				navigator.navigateMatch(current ?: -1)
-			},
-			enabled = current != null
 		)
 	}
 }
@@ -107,24 +76,25 @@ fun HomeScreen(navigator: NavigationService, service: HomeService){
 	BackHandler { navigator.navigateUp() }
 	Scaffold(
 		topBar = { HomeBar(navigator) },
-		bottomBar = { HomeNav(navigator, service) }
+		bottomBar = { HomeNav(navigator) }
 	) {
 		Column(Modifier.padding(it)) {
-			History(navigator, service)
+			MatchList(navigator, service, service.currents, "En cours :")
+			MatchList(navigator, service, service.history, "Historique :")
 		}
 	}
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun History(navigator: NavigationService, service: HomeService){
+fun MatchList(navigator: NavigationService, service: HomeService, match: List<Match>, title: String){
 	Card(Modifier.padding(8.dp).fillMaxWidth()) {
-		Text("Historique :", Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
+		Text(title, Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
 		LazyColumn {
-			items(service.history){ match ->
+			items(match, { it.uid }){ match ->
 				val dismissState = rememberDismissState(confirmStateChange = {
 					if( it == DismissValue.DismissedToStart){
-						service.deleteHistory(match.uid)
+						service.deleteMatch(match.uid)
 					}
 					it == DismissValue.DismissedToStart
 				})

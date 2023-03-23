@@ -7,4 +7,6 @@ class HomeState {
 
 	val history: MutableList<Match> = mutableStateListOf()
 
+	val currents: MutableList<Match> = mutableStateListOf()
+
 }

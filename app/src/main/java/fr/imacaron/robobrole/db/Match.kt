@@ -47,7 +47,7 @@ interface MatchDAO {
 	fun deleteCurrent()
 
 	@Query("SELECT * FROM match WHERE done = false")
-	fun getCurrent(): Match?
+	fun getCurrent(): List<Match>
 
 	@Query("SELECT * FROM match WHERE done = true ORDER by uid DESC")
 	fun getSaved(): List<Match>

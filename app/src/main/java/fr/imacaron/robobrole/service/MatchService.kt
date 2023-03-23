@@ -178,23 +178,13 @@ class MatchService(private val db: AppDatabase) {
 		state.players.addAll(players)
 	}
 
-	private fun loadSummary(){
+	private fun loadSummary() {
 		state.events.forEach {
-			if(it.type == Type.Point){
+			if (it.type == Type.Point) {
 				val sum = state.getSummary(it.team, it.quart)
 				sum[it.data.toInt()] = sum[it.data.toInt()] + 1
-			} else if(it.type == Type.Start){
+			} else if (it.type == Type.Start) {
 				state.quartStart = it.time
-			}
-		}
-	}
-
-	suspend fun cleanCurrent(){
-		withContext(Dispatchers.IO){
-			db.matchDao().getCurrent()?.let{ current ->
-				db.matchDao().deleteCurrent()
-				db.eventDAO().deleteMatch(current.uid)
-				db.matchPlayerDao().deleteMatchPlayer(current.uid)
 			}
 		}
 	}
