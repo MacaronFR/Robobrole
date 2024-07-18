@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -19,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +36,7 @@ import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.TeamService
 import kotlinx.coroutines.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun TeamScreen(service: TeamService, navigator: NavigationService){
 	var add: Boolean by remember { mutableStateOf(false) }
@@ -63,7 +63,7 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 				Spacer(Modifier.height(16.dp))
 				LazyColumn(Modifier.fillMaxWidth().padding(vertical = 0.dp), horizontalAlignment = Alignment.CenterHorizontally) {
 					items(service.players, { player: Player -> player.id }) { player ->
-						val dismissState = rememberDismissState(confirmStateChange = {
+						val dismissState = rememberDismissState(confirmValueChange = {
 							if( it == DismissValue.DismissedToStart){
 								GlobalScope.launch{
 									service.deletePlayer(player)
@@ -85,7 +85,7 @@ fun TeamScreen(service: TeamService, navigator: NavigationService){
 									DismissDirection.EndToStart -> Icons.Default.Delete
 								}
 								val scale by animateFloatAsState(
-									if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+									if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f, label = ""
 								)
 								Box(
 									Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 20.dp),

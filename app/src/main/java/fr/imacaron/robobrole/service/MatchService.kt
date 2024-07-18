@@ -79,9 +79,9 @@ class MatchService(private val db: AppDatabase) {
 		if(state.done){
 			throw IllegalStateException()
 		}
+		val ev = state.events.findLast { it.team == team && it.quart == state.quart && it.type == Type.Point && it.data == amount.toString() } ?: return
 		val sum = state.getSummary(team, state.quart)
 		sum[amount]--
-		val ev = state.events.findLast { it.team == team && it.quart == state.quart && it.type == Type.Point && it.data == amount.toString() } ?: throw IllegalArgumentException()
 		GlobalScope.launch(Dispatchers.IO) {
 			db.eventDAO().deleteEvent(ev.uid)
 		}

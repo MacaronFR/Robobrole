@@ -9,11 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberDismissState
-import androidx.compose.material.DismissValue
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.DismissDirection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -32,6 +27,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.db.Match
+import fr.imacaron.robobrole.match.defaultModifier
 import fr.imacaron.robobrole.service.HomeService
 import fr.imacaron.robobrole.service.NavigationService
 
@@ -70,7 +66,6 @@ fun HomeNav(navigator: NavigationService){
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navigator: NavigationService, service: HomeService){
 	BackHandler { navigator.navigateUp() }
@@ -79,20 +74,25 @@ fun HomeScreen(navigator: NavigationService, service: HomeService){
 		bottomBar = { HomeNav(navigator) }
 	) {
 		Column(Modifier.padding(it)) {
-			MatchList(navigator, service, service.currents, "En cours :")
-			MatchList(navigator, service, service.history, "Historique :")
+			MatchList(navigator, service, service.currents, "En cours :", "Aucun match en cours")
+			MatchList(navigator, service, service.history, "Historique :", "Aucun historique de match")
 		}
 	}
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MatchList(navigator: NavigationService, service: HomeService, match: List<Match>, title: String){
+fun MatchList(navigator: NavigationService, service: HomeService, match: List<Match>, title: String, noContent: String){
 	Card(Modifier.padding(8.dp).fillMaxWidth()) {
 		Text(title, Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
 		LazyColumn {
+			if(match.size == 0) {
+				item {
+					Text(noContent, Modifier.padding(8.dp))
+				}
+			}
 			items(match, { it.uid }){ match ->
-				val dismissState = rememberDismissState(confirmStateChange = {
+				val dismissState = rememberDismissState(confirmValueChange = {
 					if( it == DismissValue.DismissedToStart){
 						service.deleteMatch(match.uid)
 					}
@@ -112,7 +112,7 @@ fun MatchList(navigator: NavigationService, service: HomeService, match: List<Ma
 							DismissDirection.EndToStart -> Icons.Default.Delete
 						}
 						val scale by animateFloatAsState(
-							if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+							if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f, label = ""
 						)
 						Box(
 							Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 20.dp),

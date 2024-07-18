@@ -9,16 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.swipeable
-import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,11 +22,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import fr.imacaron.robobrole.components.ButtonLong
+import fr.imacaron.robobrole.drawer.FractionalThreshold
+import fr.imacaron.robobrole.drawer.rememberSwipeableState
+import fr.imacaron.robobrole.drawer.swipeable
 import fr.imacaron.robobrole.service.MatchService
 import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.ShareDownloadService
 import fr.imacaron.robobrole.state.*
-import fr.imacaron.robobrole.types.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
@@ -97,7 +92,7 @@ fun MatchFab(service: MatchService){
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MatchScreen(navigator: NavigationService, matchService: MatchService, shareDownload: ShareDownloadService){
 	val size = LocalConfiguration.current.screenWidthDp
@@ -236,7 +231,7 @@ fun Teams(service: MatchService, quart: Int){
 fun MyTeam(service: MatchService, quart: Int){
 	var displaySelector: Boolean by remember { mutableStateOf(false) }
 	var displayTime: Boolean by remember { mutableStateOf(false) }
-	var amount: Int by remember { mutableStateOf(1) }
+	var amount: Int by remember { mutableIntStateOf(1) }
 	val team = service.myTeam
 	val summary = service.myTeamSummary[quart-1]
 	Column {
@@ -252,7 +247,7 @@ fun MyTeam(service: MatchService, quart: Int){
 						}
 					},
 					{
-						service.removePoint(amount, team)
+						service.removePoint(i, team)
 					},
 					service.start && !service.done,
 					i.toString()
@@ -299,8 +294,8 @@ fun OtherTeam(service: MatchService, quart: Int){
 	Column {
 		Row(Modifier.fillMaxWidth().padding(16.dp, 16.dp), horizontalArrangement = Arrangement.SpaceAround){
 			PointButton({ service.addPoint(1, team) }, { service.removePoint(1, team) }, service.start && !service.done, "1"){ Text(summary.one.toString()) }
-			PointButton({ service.addPoint(2, team) }, { service.removePoint(1, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
-			PointButton({ service.addPoint(3, team) }, { service.removePoint(1, team) }, service.start && !service.done, "3"){ Text(summary.three.toString()) }
+			PointButton({ service.addPoint(2, team) }, { service.removePoint(2, team) }, service.start && !service.done, "2"){ Text(summary.two.toString()) }
+			PointButton({ service.addPoint(3, team) }, { service.removePoint(3, team) }, service.start && !service.done,"3"){ Text(summary.three.toString()) }
 		}
 		QuartTeamPoint(quart, team, summary)
 	}

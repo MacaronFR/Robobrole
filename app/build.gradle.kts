@@ -5,8 +5,8 @@ plugins {
 	id("com.google.devtools.ksp").version("1.8.0-1.0.9")
 }
 
-val compose_ui_version = "1.3.3"
-val room_version = "2.5.0"
+val compose_ui_version = "1.5.1"
+val room_version = "2.5.2"
 
 class RoomSchemaArgProvider(
 	@get:InputDirectory
@@ -25,13 +25,13 @@ ksp {
 
 android {
 	namespace = "fr.imacaron.robobrole"
-	compileSdk = 33
+	compileSdk = 34
 
 	defaultConfig {
 		applicationId = "fr.imacaron.robobrole"
 		minSdk = 33
 		targetSdk = 33
-		versionCode = 1
+		versionCode = 2
 		versionName = "1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -71,19 +71,18 @@ android {
 }
 
 dependencies {
-
-	implementation("androidx.core:core-ktx:1.9.0")
-	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-	implementation("androidx.activity:activity-compose:1.7.0")
+	implementation("androidx.core:core-ktx:1.12.0")
+	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+	implementation("androidx.activity:activity-compose:1.7.2")
 	implementation("androidx.compose.ui:ui:$compose_ui_version")
-	implementation("androidx.compose.ui:ui-tooling-preview:$compose_ui_version")
-	implementation("androidx.compose.material:material:1.4.0")
-	implementation("androidx.compose.material3:material3:1.0.1")
-	implementation("androidx.navigation:navigation-compose:2.5.3")
+//	implementation("androidx.compose.ui:ui-tooling-preview:$compose_ui_version")
+//	implementation("androidx.compose.material:material:1.5.1")
+	implementation("androidx.compose.material3:material3:1.1.1")
+	implementation("androidx.navigation:navigation-compose:2.7.2")
 	implementation("androidx.room:room-runtime:$room_version")
-	implementation("androidx.compose.ui:ui-util:1.4.0")
+	implementation("androidx.compose.ui:ui-util:1.5.1")
 	implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
-	implementation("androidx.compose.material:material-icons-extended:1.4.0")
+	implementation("androidx.compose.material:material-icons-extended:1.5.1")
 	implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 	annotationProcessor("androidx.room:room-compiler:$room_version")
 	ksp("androidx.room:room-compiler:$room_version")

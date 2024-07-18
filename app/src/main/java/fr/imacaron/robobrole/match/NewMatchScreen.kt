@@ -3,10 +3,8 @@
 package fr.imacaron.robobrole.match
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Groups
@@ -20,6 +18,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import fr.imacaron.robobrole.components.Select
 import fr.imacaron.robobrole.service.NavigationService
 import fr.imacaron.robobrole.service.NewMatchService
 import kotlinx.coroutines.*
@@ -38,7 +37,7 @@ fun NewMatchBar(navigator: NavigationService){
 	)
 }
 
-@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun NewMatchScreen(service: NewMatchService, navigator: NavigationService){
 	BackHandler { navigator.navigateUp() }
@@ -67,7 +66,6 @@ fun NewMatchScreen(service: NewMatchService, navigator: NavigationService){
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchInfo(service: NewMatchService){
 	val focusRequester = remember { FocusRequester() }
@@ -101,19 +99,21 @@ fun MatchInfo(service: NewMatchService){
 				Text("Féminin")
 			}
 		}
-		Box(defaultModifier){
-			OutlinedTextField(service.level, {}, Modifier.fillMaxWidth(), label = { Text("Niveau") }, trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) })
-			DropdownMenu(service.openLevel, { service.openLevel = false }, Modifier.fillMaxWidth(0.6f)){
-				DropdownMenuItem({ Text("U9")}, { service.level = "U9"; service.openLevel = false })
-				DropdownMenuItem({ Text("U11")}, { service.level = "U11"; service.openLevel = false })
-				DropdownMenuItem({ Text("U13")}, { service.level = "U13"; service.openLevel = false })
-				DropdownMenuItem({ Text("U15")}, { service.level = "U15"; service.openLevel = false })
-				DropdownMenuItem({ Text("U17")}, { service.level = "U17"; service.openLevel = false })
-				DropdownMenuItem({ Text("U18")}, { service.level = "U18"; service.openLevel = false })
-				DropdownMenuItem({ Text("U20")}, { service.level = "U20"; service.openLevel = false })
-				DropdownMenuItem({ Text("Senior")}, { service.level = "Senior"; service.openLevel = false })
-			}
-			Spacer(Modifier.matchParentSize().clickable { service.openLevel = true })
+		Select(
+			service.level,
+			service.openLevel,
+			label = { Text("Niveau") },
+			onDismissRequest = { service.openLevel = false },
+			onOpenRequest = { service.openLevel = true }
+		){
+			DropdownMenuItem({ Text("U9")}, { service.level = "U9"; service.openLevel = false })
+			DropdownMenuItem({ Text("U11")}, { service.level = "U11"; service.openLevel = false })
+			DropdownMenuItem({ Text("U13")}, { service.level = "U13"; service.openLevel = false })
+			DropdownMenuItem({ Text("U15")}, { service.level = "U15"; service.openLevel = false })
+			DropdownMenuItem({ Text("U17")}, { service.level = "U17"; service.openLevel = false })
+			DropdownMenuItem({ Text("U18")}, { service.level = "U18"; service.openLevel = false })
+			DropdownMenuItem({ Text("U20")}, { service.level = "U20"; service.openLevel = false })
+			DropdownMenuItem({ Text("Senior")}, { service.level = "Senior"; service.openLevel = false })
 		}
 	}
 }

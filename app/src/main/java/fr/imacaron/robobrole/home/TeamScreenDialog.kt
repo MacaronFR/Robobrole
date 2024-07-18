@@ -9,7 +9,7 @@ import fr.imacaron.robobrole.db.Player
 import fr.imacaron.robobrole.service.TeamService
 import kotlinx.coroutines.*
 
-@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun TeamScreenDialog(add: Boolean, closeAdd: () -> Unit, service: TeamService) {
 	var name: String by remember { mutableStateOf("") }
@@ -34,7 +34,7 @@ fun TeamScreenDialog(add: Boolean, closeAdd: () -> Unit, service: TeamService) {
 			title = { Text("Ajouter un joueur") },
 			text = {
 				Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-					OutlinedTextField(name, { name = it }, label = { Text("Nom") }, isError = name == "")
+					OutlinedTextField(name, { name = it }, label = { Text("Nom") }, isError = name == "", singleLine = true)
 				}
 			}
 		)
